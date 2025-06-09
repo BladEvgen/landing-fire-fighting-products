@@ -96,13 +96,14 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "eshop_app.context_processors.current_year",
+                "core.context_processors.current_year",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "firetech.wsgi.application"
+ASGI_APPLICATION = "firetech.asgi.application"
+
 
 CHANNEL_LAYERS = {
     "default": {
