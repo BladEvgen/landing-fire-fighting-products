@@ -132,7 +132,7 @@ else:
 
 DATABASES = {"default": {}}
 
-if not DEBUG:
+if DEBUG:
     # If debug using SQLite3
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.sqlite3",
