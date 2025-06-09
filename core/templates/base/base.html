@@ -1,0 +1,21 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Base{% endblock %}</title>
+  <link rel="stylesheet" href="{{ static('css/output.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  {% include "base/header.html" %}
+  {% include "base/messages.html" %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  {% include "base/footer.html" %}
+  <script src="{{ static('js/alpine.min.js') }}" defer></script>
+  <script src="{{ static('js/swiper-bundle.min.js') }}"></script>
+  <script src="{{ static('js/main.js') }}"></script>
+</body>
+</html>
