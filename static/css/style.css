@@ -1,7 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 @import "./swiper-bundle.min.css";
 @import "./animate.min.css";
 @import "./fontawesome/css/all.min.css";
