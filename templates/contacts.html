@@ -1,0 +1,545 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Контакты | {{ company_info.name|default:"Вымпел-45" }}{% endblock %}
+
+{% block description %}Контакты {{ company_info.name|default:"Вымпел-45" }} - адрес, телефон, email. Свяжитесь с нами для получения консультации по противопожарным металлоизделиям.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-card {
+        background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,245,240,0.95) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 107, 0, 0.1);
+    }
+    
+    .form-floating {
+        position: relative;
+    }
+    
+    .form-floating label {
+        position: absolute;
+        left: 1rem;
+        top: 1rem;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    
+    .form-floating input:focus + label,
+    .form-floating input:not(:placeholder-shown) + label,
+    .form-floating textarea:focus + label,
+    .form-floating textarea:not(:placeholder-shown) + label {
+        top: -0.5rem;
+        left: 0.75rem;
+        font-size: 0.75rem;
+        color: #ff6b00;
+        background: white;
+        padding: 0 0.25rem;
+    }
+    
+    .contact-item {
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,245,240,0.9) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 107, 0, 0.1);
+    }
+    
+    .contact-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 35px rgba(255, 107, 0, 0.15);
+        border-color: rgba(255, 107, 0, 0.3);
+    }
+    
+    .fire-input {
+        background: rgba(255, 255, 255, 0.95);
+        border: 2px solid rgba(255, 107, 0, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .fire-input:focus {
+        border-color: #ff6b00;
+        box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.1);
+        background: white;
+    }
+    
+    .steel-input {
+        background: rgba(112, 128, 144, 0.05);
+        border: 2px solid rgba(112, 128, 144, 0.2);
+        transition: all 0.3s ease;
+    }
+    
+    .steel-input:focus {
+        border-color: #708090;
+        box-shadow: 0 0 0 4px rgba(112, 128, 144, 0.1);
+        background: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-red-700 via-orange-600 to-red-700 py-20 pt-28 overflow-hidden">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ff6b00" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
+        <h1 class="text-4xl md:text-6xl font-black text-white mb-6">
+            Свяжитесь с нами
+        </h1>
+        <p class="text-xl text-orange-100 max-w-2xl mx-auto mb-8">
+            Готовы ответить на любые вопросы и предоставить профессиональную консультацию от экспертов по пожарной безопасности
+        </p>
+        
+        <!-- Quick Contact Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
+            {% if company_info.phone %}
+            <a href="tel:{{ company_info.phone }}" 
+               class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white text-red-700 font-bold rounded-xl hover:bg-orange-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105">
+                <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Позвонить сейчас
+            </a>
+            {% endif %}
+            
+            {% if company_info.email %}
+            <a href="mailto:{{ company_info.email }}" 
+               class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white/10 backdrop-blur-sm text-white font-bold rounded-xl hover:bg-white/20 transition-all duration-300 border border-white/20 hover:border-white/40">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+                Написать email
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information -->
+<section class="py-16 bg-gradient-to-br from-slate-50 to-orange-50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-3 gap-8">
+            
+            <!-- Contact Details -->
+            <div class="lg:col-span-1 space-y-6">
+                <div>
+                    <h2 class="text-3xl font-black text-red-700 mb-6">
+                        Наши контакты
+                    </h2>
+                    <p class="text-gray-600 mb-8">
+                        Мы всегда готовы помочь вам с выбором противопожарного оборудования и ответить на все ваши вопросы.
+                    </p>
+                </div>
+                
+                <!-- Contact Items -->
+                <div class="space-y-4">
+                    {% if company_info.phone %}
+                    <div class="contact-item p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-red-700 mb-1">Телефон</h3>
+                                <a href="tel:{{ company_info.phone }}" class="text-gray-700 hover:text-orange-600 transition-colors text-lg font-semibold">
+                                    {{ company_info.phone }}
+                                </a>
+                                <p class="text-sm text-gray-500 mt-1">Звонки принимаем в рабочее время</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company_info.email %}
+                    <div class="contact-item p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-red-700 mb-1">Email</h3>
+                                <a href="mailto:{{ company_info.email }}" class="text-gray-700 hover:text-orange-600 transition-colors font-semibold">
+                                    {{ company_info.email }}
+                                </a>
+                                <p class="text-sm text-gray-500 mt-1">Ответим в течение 2 часов</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company_info.address %}
+                    <div class="contact-item p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-red-700 mb-1">Адрес</h3>
+                                <p class="text-gray-700 font-medium">{{ company_info.address }}</p>
+                                <p class="text-sm text-gray-500 mt-1">Производство и офис продаж</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if company_info.working_hours %}
+                    <div class="contact-item p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-red-700 mb-1">Режим работы</h3>
+                                <p class="text-gray-700 font-medium">{{ company_info.working_hours }}</p>
+                                <p class="text-sm text-gray-500 mt-1">По московскому времени</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Social Links -->
+                <div class="pt-6">
+                    <h3 class="text-lg font-bold text-red-700 mb-4">Мы в соцсетях</h3>
+                    <div class="flex gap-3">
+                        {% if company_info.vk_url %}
+                        <a href="{{ company_info.vk_url }}" target="_blank" 
+                           class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-110 shadow-lg">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.785 16.241s.288-.032.436-.193c.136-.148.131-.426.131-.426s-.019-1.302.58-1.493c.591-.189 1.35 1.258 2.157 1.815.614.425 1.081.332 1.081.332l2.174-.03s1.137-.071.597-.973c-.044-.074-.315-.664-1.624-1.878-1.372-1.27-1.188-1.064.464-3.258.988-1.314 1.374-2.117 1.253-2.462-.116-.33-.832-.243-.832-.243l-2.447.015s-.181-.025-.315.056c-.131.078-.215.26-.215.26s-.383 1.02-.894 1.89c-1.077 1.832-1.508 1.929-1.686 1.815-.415-.265-.311-1.064-.311-1.632 0-1.776.268-2.517-.522-2.707-.262-.063-.455-.105-1.125-.112-0.861-.009-1.589.003-2.001.205-.274.134-.486.432-.357.449.16.021.522.098.713.36.247.338.238 1.097.238 1.097s.142 2.093-.331 2.352c-.325.178-.77-.185-1.725-1.846-.489-.844-.858-1.777-.858-1.777s-.071-.174-.198-.267c-.154-.113-.37-.149-.37-.149l-2.324.015s-.349.01-.476.161c-.113.135-.009.413-.009.413s1.805 4.23 3.847 6.361c1.875 1.956 4.007 1.827 4.007 1.827z"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                        
+                        {% if company_info.telegram_url %}
+                        <a href="{{ company_info.telegram_url }}" target="_blank" 
+                           class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-110 shadow-lg">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                        
+                        {% if company_info.whatsapp_phone %}
+                        <a href="https://wa.me/{{ company_info.whatsapp_phone|cut:'+' }}" target="_blank" 
+                           class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-110 shadow-lg">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.088"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="lg:col-span-2">
+                <div class="contact-card p-8 rounded-3xl shadow-lg">
+                    <h2 class="text-3xl font-black text-red-700 mb-6">
+                        Оставьте заявку
+                    </h2>
+                    <p class="text-gray-600 mb-8">
+                        Заполните форму, и наш специалист свяжется с вами в ближайшее время для обсуждения деталей заказа и предоставления индивидуального предложения.
+                    </p>
+                    
+                    <form method="POST" x-data="contactForm()" @submit.prevent="submitForm()" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <!-- Name Field -->
+                            <div class="form-floating">
+                                <input type="text" 
+                                       id="name" 
+                                       name="name" 
+                                       x-model="form.name"
+                                       placeholder=" "
+                                       required
+                                       class="w-full px-4 py-4 fire-input rounded-xl focus:outline-none transition-all duration-300">
+                                <label for="name">Ваше имя *</label>
+                            </div>
+                            
+                            <!-- Phone Field с маской -->
+                            <div class="form-floating">
+                                <input type="tel" 
+                                       id="phone" 
+                                       name="phone" 
+                                       x-model="form.phone"
+                                       placeholder=" "
+                                       required
+                                       oninput="formatPhone(this)"
+                                       class="w-full px-4 py-4 fire-input rounded-xl focus:outline-none transition-all duration-300">
+                                <label for="phone">Телефон *</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Email Field -->
+                        <div class="form-floating">
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   x-model="form.email"
+                                   placeholder=" "
+                                   class="w-full px-4 py-4 steel-input rounded-xl focus:outline-none transition-all duration-300">
+                            <label for="email">Email</label>
+                        </div>
+                        
+                        <!-- Message Field -->
+                        <div class="form-floating">
+                            <textarea id="message" 
+                                      name="message" 
+                                      x-model="form.message"
+                                      placeholder=" "
+                                      rows="4"
+                                      class="w-full px-4 py-4 steel-input rounded-xl focus:outline-none transition-all duration-300 resize-none"></textarea>
+                            <label for="message">Сообщение</label>
+                        </div>
+                        
+                        <!-- Consent Checkbox -->
+                        <div class="flex items-start gap-3">
+                            <input type="checkbox" 
+                                   id="consent" 
+                                   name="consent" 
+                                   x-model="form.consent"
+                                   required
+                                   class="mt-1 w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                            <label for="consent" class="text-sm text-gray-600 leading-relaxed">
+                                Я согласен на <a href="#" class="text-orange-600 hover:underline font-semibold">обработку персональных данных</a> 
+                                и получение информационных сообщений
+                            </label>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <button type="submit" 
+                                :disabled="loading"
+                                :class="{ 'opacity-50 cursor-not-allowed': loading }"
+                                class="w-full px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:hover:scale-100">
+                            <span x-show="!loading" class="flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                                </svg>
+                                Отправить заявку
+                            </span>
+                            <span x-show="loading" class="flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Отправка...
+                            </span>
+                        </button>
+                        
+                        <!-- Success/Error Messages -->
+                        <div x-show="message" x-transition 
+                             :class="{ 'bg-green-50 border-green-200 text-green-800': messageType === 'success', 'bg-red-50 border-red-200 text-red-800': messageType === 'error' }"
+                             class="p-4 rounded-xl border" style="display: none;">
+                            <p x-text="message" class="font-medium"></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+{% if company_info.address %}
+<section class="py-16 bg-gradient-to-br from-orange-50 to-slate-50">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-black text-red-700 mb-4">
+                Как нас найти
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Наше производство и офис продаж находятся в Кирове. Приезжайте к нам для личной консультации!
+            </p>
+        </div>
+        
+        <div class="contact-card rounded-3xl shadow-lg overflow-hidden">
+            <!-- Placeholder для карты -->
+            <div class="h-96 bg-gradient-to-br from-slate-200 to-orange-100 flex items-center justify-center relative">
+                <div class="text-center z-10">
+                    <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <p class="text-red-700 font-bold text-lg">Интерактивная карта</p>
+                    <p class="text-gray-600">{{ company_info.address }}</p>
+                    <p class="text-sm text-gray-500 mt-2">Производство и офис продаж</p>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- FAQ Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl md:text-4xl font-black text-red-700 mb-4">
+                Часто задаваемые вопросы
+            </h2>
+            <p class="text-gray-600">
+                Ответы на популярные вопросы о нашей продукции и услугах
+            </p>
+        </div>
+        
+        <div x-data="{ openFaq: null }" class="space-y-4">
+            <!-- FAQ Item 1 -->
+            <div class="border border-orange-200 rounded-xl overflow-hidden contact-item">
+                <button @click="openFaq = openFaq === 1 ? null : 1" 
+                        class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-orange-50 transition-colors">
+                    <span class="font-semibold text-red-700">Какие сертификаты имеет ваша продукция?</span>
+                    <svg :class="{ 'rotate-180': openFaq === 1 }" class="w-5 h-5 text-orange-600 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="openFaq === 1" x-transition class="px-6 pb-4" style="display: none;">
+                    <p class="text-gray-600">Вся наша продукция имеет сертификаты соответствия ГОСТ и ТР ЕАЭС. Сертификаты пожарной безопасности выданы аккредитованными испытательными лабораториями.</p>
+                </div>
+            </div>
+            
+            <!-- FAQ Item 2 -->
+            <div class="border border-orange-200 rounded-xl overflow-hidden contact-item">
+                <button @click="openFaq = openFaq === 2 ? null : 2" 
+                        class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-orange-50 transition-colors">
+                    <span class="font-semibold text-red-700">Какие сроки изготовления заказа?</span>
+                    <svg :class="{ 'rotate-180': openFaq === 2 }" class="w-5 h-5 text-orange-600 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="openFaq === 2" x-transition class="px-6 pb-4" style="display: none;">
+                    <p class="text-gray-600">Стандартные изделия изготавливаем за 5-10 рабочих дней. Нестандартные размеры - 15-25 рабочих дней. Точные сроки зависят от сложности и объема заказа.</p>
+                </div>
+            </div>
+            
+            <!-- FAQ Item 3 -->
+            <div class="border border-orange-200 rounded-xl overflow-hidden contact-item">
+                <button @click="openFaq = openFaq === 3 ? null : 3" 
+                        class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-orange-50 transition-colors">
+                    <span class="font-semibold text-red-700">Осуществляете ли вы доставку по регионам?</span>
+                    <svg :class="{ 'rotate-180': openFaq === 3 }" class="w-5 h-5 text-orange-600 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="openFaq === 3" x-transition class="px-6 pb-4" style="display: none;">
+                    <p class="text-gray-600">Да, мы осуществляем доставку по всей территории Российской Федерации. Доставка производится автотранспортом или через транспортные компании.</p>
+                </div>
+            </div>
+            
+            <!-- FAQ Item 4 -->
+            <div class="border border-orange-200 rounded-xl overflow-hidden contact-item">
+                <button @click="openFaq = openFaq === 4 ? null : 4" 
+                        class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-orange-50 transition-colors">
+                    <span class="font-semibold text-red-700">Предоставляете ли вы гарантию на продукцию?</span>
+                    <svg :class="{ 'rotate-180': openFaq === 4 }" class="w-5 h-5 text-orange-600 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <div x-show="openFaq === 4" x-transition class="px-6 pb-4" style="display: none;">
+                    <p class="text-gray-600">На всю нашу продукцию предоставляется гарантия 25 лет. Гарантия распространяется на качество изготовления и соответствие техническим характеристикам.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function contactForm() {
+        return {
+            form: {
+                name: '',
+                phone: '',
+                email: '',
+                message: '',
+                consent: false
+            },
+            loading: false,
+            message: '',
+            messageType: 'success',
+            
+            async submitForm() {
+                if (!this.validateForm()) return;
+                
+                this.loading = true;
+                this.message = '';
+                
+                try {
+                    const formData = new FormData();
+                    Object.keys(this.form).forEach(key => {
+                        formData.append(key, this.form[key]);
+                    });
+                    
+                    const response = await fetch('{% url "core:contacts" %}', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        this.message = 'Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.';
+                        this.messageType = 'success';
+                        this.resetForm();
+                    } else {
+                        throw new Error('Ошибка отправки');
+                    }
+                } catch (error) {
+                    this.message = 'Произошла ошибка при отправке заявки. Попробуйте позже или позвоните нам.';
+                    this.messageType = 'error';
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            validateForm() {
+                if (!this.form.name.trim()) {
+                    this.showError('Введите ваше имя');
+                    return false;
+                }
+                if (!this.form.phone.trim()) {
+                    this.showError('Введите номер телефона');
+                    return false;
+                }
+                if (!this.form.consent) {
+                    this.showError('Необходимо согласие на обработку персональных данных');
+                    return false;
+                }
+                return true;
+            },
+            
+            showError(text) {
+                this.message = text;
+                this.messageType = 'error';
+            },
+            
+            resetForm() {
+                this.form = {
+                    name: '',
+                    phone: '',
+                    email: '',
+                    message: '',
+                    consent: false
+                };
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,506 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}{{ product.meta_title|default:product.name }} | {{ company_info.name|default:"Вымпел-45" }}{% endblock %}
+
+{% block description %}{{ product.meta_description|default:product.short_description|default:product.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-gallery {
+        position: relative;
+    }
+    
+    .main-image {
+        transition: transform 0.3s ease;
+    }
+    
+    .main-image:hover {
+        transform: scale(1.05);
+    }
+    
+    .thumbnail {
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .thumbnail:hover,
+    .thumbnail.active {
+        border-color: #ff6b00;
+        transform: scale(1.05);
+    }
+    
+    .specifications-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .spec-item {
+        background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+        border-left: 4px solid #ff6b00;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumbs -->
+<section class="pt-28 pb-6 bg-fire-bg">
+    <div class="max-w-7xl mx-auto px-6">
+        <nav class="flex items-center gap-2 text-sm text-gray-600">
+            <a href="{% url 'core:index' %}" class="hover:text-fire-accent transition-colors">Главная</a>
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <a href="{% url 'core:catalog' %}" class="hover:text-fire-accent transition-colors">Каталог</a>
+            {% if product.categories.exists %}
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <a href="{% url 'core:catalog' %}?category={{ product.categories.first.slug }}" class="hover:text-fire-accent transition-colors">
+                {{ product.categories.first.name }}
+            </a>
+            {% endif %}
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+            <span class="text-fire-primary font-medium">{{ product.name }}</span>
+        </nav>
+    </div>
+</section>
+
+<!-- Product Details -->
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12 items-start">
+            
+            <!-- Product Gallery -->
+            <div class="product-gallery" x-data="productGallery()">
+                <!-- Main Image -->
+                <div class="relative mb-6 overflow-hidden rounded-2xl shadow-fire-lg">
+                    {% if product.main_image %}
+                        <img x-ref="mainImage" 
+                             src="{{ product.main_image.url }}" 
+                             alt="{{ product.name }}" 
+                             class="w-full h-96 lg:h-[500px] object-cover main-image cursor-zoom-in"
+                             @click="openModal()">
+                    {% else %}
+                        <div class="w-full h-96 lg:h-[500px] bg-gradient-to-br from-fire-bg to-gray-200 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Zoom icon -->
+                    <div class="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-lg backdrop-blur-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Badges -->
+                    <div class="absolute top-4 left-4 flex flex-col gap-2">
+                        {% if product.is_featured %}
+                        <span class="bg-fire-accent text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+                            Хит продаж
+                        </span>
+                        {% endif %}
+                        {% if product.is_new %}
+                        <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+                            Новинка
+                        </span>
+                        {% endif %}
+                        {% if not product.in_stock %}
+                        <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
+                            Под заказ
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Thumbnails -->
+                {% if product.images.exists %}
+                <div class="grid grid-cols-4 gap-2">
+                    <img src="{{ product.main_image.url }}" 
+                         alt="{{ product.name }}" 
+                         class="w-full h-20 object-cover rounded-lg thumbnail active"
+                         @click="changeMainImage('{{ product.main_image.url }}', $event)">
+                    {% for image in product.images.all %}
+                    <img src="{{ image.image.url }}" 
+                         alt="{{ image.alt_text|default:product.name }}" 
+                         class="w-full h-20 object-cover rounded-lg thumbnail"
+                         @click="changeMainImage('{{ image.image.url }}', $event)">
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Modal for full-size image -->
+                <div x-show="showModal" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+                     @click="closeModal()"
+                     style="display: none;">
+                    <img :src="currentImage" 
+                         alt="{{ product.name }}" 
+                         class="max-w-full max-h-full object-contain rounded-lg"
+                         @click.stop>
+                    <button @click="closeModal()" 
+                            class="absolute top-4 right-4 text-white hover:text-fire-accent text-3xl">
+                        ×
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-black text-fire-primary mb-4">
+                        {{ product.name }}
+                    </h1>
+                    
+                    <!-- Categories and Tags -->
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        {% for category in product.categories.all %}
+                        <a href="{% url 'core:catalog' %}?category={{ category.slug }}" 
+                           class="bg-fire-bg text-fire-primary px-3 py-1 rounded-full text-sm hover:bg-fire-accent hover:text-white transition-colors">
+                            {{ category.name }}
+                        </a>
+                        {% endfor %}
+                        {% for tag in product.tags.all %}
+                        <a href="{% url 'core:catalog' %}?tag={{ tag.slug }}" 
+                           class="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm hover:bg-gray-200 transition-colors">
+                            {{ tag.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if product.short_description %}
+                    <p class="text-xl text-gray-600 leading-relaxed">
+                        {{ product.short_description }}
+                    </p>
+                    {% endif %}
+                </div>
+                
+                <!-- Price and Stock -->
+                <div class="bg-gradient-to-r from-fire-bg to-white p-6 rounded-2xl shadow-fire">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            {% if product.price %}
+                            <div class="text-3xl font-black text-fire-accent mb-2">
+                                {{ product.display_price }}
+                            </div>
+                            {% else %}
+                            <div class="text-2xl font-bold text-gray-600 mb-2">
+                                Цена по запросу
+                            </div>
+                            {% endif %}
+                            
+                            <div class="flex items-center gap-2">
+                                {% if product.in_stock %}
+                                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-green-600 font-medium">В наличии</span>
+                                {% else %}
+                                <div class="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+                                <span class="text-orange-600 font-medium">Под заказ</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col gap-3">
+                            {% if company_info.phone %}
+                            <a href="tel:{{ company_info.phone }}" 
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                </svg>
+                                Позвонить
+                            </a>
+                            {% endif %}
+                            
+                            <a href="{% url 'core:contacts' %}" 
+                               class="inline-flex items-center gap-2 px-6 py-3 bg-fire-primary text-white font-bold rounded-full hover:bg-fire-accent transition-all duration-300">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                                </svg>
+                                Заказать расчет
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Key Features -->
+                <div class="bg-white border border-gray-200 rounded-2xl p-6">
+                    <h3 class="text-xl font-bold text-fire-primary mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        Ключевые особенности
+                    </h3>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-fire-accent rounded-full"></div>
+                            <span>Сертифицированная продукция</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-fire-accent rounded-full"></div>
+                            <span>Гарантия качества 25 лет</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-fire-accent rounded-full"></div>
+                            <span>Изготовление по ГОСТ</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <div class="w-2 h-2 bg-fire-accent rounded-full"></div>
+                            <span>Доставка по всей России</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Product Details Tabs -->
+<section class="py-12 bg-fire-bg">
+    <div class="max-w-7xl mx-auto px-6">
+        <div x-data="{ activeTab: 'description' }" class="bg-white rounded-2xl shadow-fire overflow-hidden">
+            
+            <!-- Tab Headers -->
+            <div class="flex border-b border-gray-200">
+                <button @click="activeTab = 'description'" 
+                        :class="{ 'border-fire-accent text-fire-accent bg-fire-bg': activeTab === 'description' }"
+                        class="px-6 py-4 border-b-2 border-transparent font-medium hover:text-fire-accent transition-colors">
+                    Описание
+                </button>
+                {% if product.specifications %}
+                <button @click="activeTab = 'specifications'" 
+                        :class="{ 'border-fire-accent text-fire-accent bg-fire-bg': activeTab === 'specifications' }"
+                        class="px-6 py-4 border-b-2 border-transparent font-medium hover:text-fire-accent transition-colors">
+                    Характеристики
+                </button>
+                {% endif %}
+                <button @click="activeTab = 'delivery'" 
+                        :class="{ 'border-fire-accent text-fire-accent bg-fire-bg': activeTab === 'delivery' }"
+                        class="px-6 py-4 border-b-2 border-transparent font-medium hover:text-fire-accent transition-colors">
+                    Доставка
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="p-8">
+                
+                <!-- Description Tab -->
+                <div x-show="activeTab === 'description'" x-transition>
+                    {% if product.description %}
+                        <div class="prose prose-lg max-w-none">
+                            {{ product.description|linebreaks }}
+                        </div>
+                    {% else %}
+                        <p class="text-gray-600">Подробное описание товара будет добавлено в ближайшее время.</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Specifications Tab -->
+                {% if product.specifications %}
+                <div x-show="activeTab === 'specifications'" x-transition style="display: none;">
+                    <div class="specifications-grid">
+                        {% for key, value in product.specifications.items %}
+                        <div class="spec-item p-4 rounded-lg">
+                            <div class="font-semibold text-fire-primary mb-1">{{ key }}</div>
+                            <div class="text-gray-700">{{ value }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Delivery Tab -->
+                <div x-show="activeTab === 'delivery'" x-transition style="display: none;">
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-bold text-fire-primary mb-4">Способы доставки</h4>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-fire-accent mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
+                                        <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-1-1h-3z"/>
+                                    </svg>
+                                    <div>
+                                        <div class="font-semibold">Автомобильная доставка</div>
+                                        <div class="text-gray-600">По Кирову и области</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-fire-accent mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div>
+                                        <div class="font-semibold">Транспортные компании</div>
+                                        <div class="text-gray-600">По всей России</div>
+                                    </div>
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-fire-accent mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <div>
+                                        <div class="font-semibold">Самовывоз</div>
+                                        <div class="text-gray-600">С производства в Кирове</div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-fire-primary mb-4">Сроки изготовления</h4>
+                            <div class="bg-fire-bg p-4 rounded-lg">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-semibold">Стандартные изделия:</span>
+                                </div>
+                                <p class="text-gray-700 mb-3">5-10 рабочих дней</p>
+                                
+                                <div class="flex items-center gap-2 mb-2">
+                                    <svg class="w-5 h-5 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-semibold">Нестандартные размеры:</span>
+                                </div>
+                                <p class="text-gray-700">15-25 рабочих дней</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related Products -->
+{% if related_products %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+        <h2 class="text-3xl md:text-4xl font-black text-fire-primary text-center mb-12">
+            Похожие товары
+        </h2>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% for related_product in related_products %}
+            <div class="bg-white rounded-2xl shadow-fire hover:shadow-fire-lg transition-all duration-300 overflow-hidden group card-hover">
+                <div class="relative overflow-hidden">
+                    {% if related_product.main_image %}
+                        <img src="{{ related_product.main_image.url }}" 
+                             alt="{{ related_product.name }}" 
+                             class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700">
+                    {% else %}
+                        <div class="w-full h-48 bg-gradient-to-br from-fire-bg to-gray-200 flex items-center justify-center">
+                            <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="p-4">
+                    <h3 class="font-bold text-fire-primary mb-2 group-hover:text-fire-accent transition-colors">
+                        {{ related_product.name|truncatechars:50 }}
+                    </h3>
+                    <div class="flex items-center justify-between">
+                        {% if related_product.price %}
+                            <span class="text-fire-accent font-bold">{{ related_product.display_price }}</span>
+                        {% else %}
+                            <span class="text-gray-500 text-sm">Цена по запросу</span>
+                        {% endif %}
+                        <a href="{{ related_product.get_absolute_url }}" 
+                           class="px-4 py-2 bg-fire-primary text-white text-sm rounded-full hover:bg-fire-accent transition-colors">
+                            Подробнее
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Contact CTA -->
+<section class="py-16 bg-gradient-to-r from-fire-primary to-slate-800">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h3 class="text-3xl md:text-4xl font-black text-white mb-4">
+            Остались вопросы о товаре?
+        </h3>
+        <p class="text-lg text-gray-300 mb-6">
+            Наши специалисты предоставят подробную консультацию и помогут с выбором
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if company_info.phone %}
+            <a href="tel:{{ company_info.phone }}" 
+               class="inline-flex items-center gap-2 px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Позвонить специалисту
+            </a>
+            {% endif %}
+            <a href="{% url 'core:contacts' %}" 
+               class="inline-flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-fire-primary transition-all duration-300">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+                Написать нам
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function productGallery() {
+        return {
+            showModal: false,
+            currentImage: '{{ product.main_image.url|default:"" }}',
+            
+            changeMainImage(imageSrc, event) {
+                this.$refs.mainImage.src = imageSrc;
+                this.currentImage = imageSrc;
+                
+                // Update active thumbnail
+                document.querySelectorAll('.thumbnail').forEach(thumb => {
+                    thumb.classList.remove('active');
+                });
+                event.target.classList.add('active');
+            },
+            
+            openModal() {
+                this.showModal = true;
+                document.body.style.overflow = 'hidden';
+            },
+            
+            closeModal() {
+                this.showModal = false;
+                document.body.style.overflow = '';
+            }
+        }
+    }
+    
+    // Keyboard navigation for modal
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            // Close modal if open
+            const event = new CustomEvent('close-modal');
+            window.dispatchEvent(event);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,449 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}О компании | {{ company_info.name|default:"Вымпел-45" }}{% endblock %}
+
+{% block description %}{{ company_info.meta_description|default:"О компании Вымпел-45 - более 25 лет опыта в производстве противопожарных металлоизделий. История, достижения, производственные мощности." }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline-item {
+        position: relative;
+        padding-left: 3rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0.75rem;
+        top: 2rem;
+        bottom: -1rem;
+        width: 2px;
+        background: linear-gradient(to bottom, #ff6b00, transparent);
+    }
+    
+    .timeline-item:last-child::before {
+        display: none;
+    }
+    
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: 0.5rem;
+        top: 1.5rem;
+        width: 0.75rem;
+        height: 0.75rem;
+        background: #ff6b00;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 3px #ff6b00;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, rgba(255,107,0,0.1) 0%, rgba(255,255,255,0.9) 100%);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,107,0,0.2);
+    }
+    
+    .team-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .parallax-bg {
+        background-attachment: fixed;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="relative bg-gradient-to-br from-fire-primary via-slate-800 to-fire-primary py-20 pt-28 overflow-hidden">
+    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ff6b00" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
+        <h1 class="text-4xl md:text-6xl font-black text-white mb-6">
+            О компании {{ company_info.name|default:"Вымпел-45" }}
+        </h1>
+        <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+            {% if company_info.description %}
+                {{ company_info.description }}
+            {% else %}
+                Более 25 лет создаем надежные решения для обеспечения пожарной безопасности. 
+                От небольшой мастерской до современного производственного предприятия.
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 bg-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6" x-data="{inView: false}" x-intersect="inView = true">
+            {% for achievement in achievements %}
+            <div class="stats-card p-8 rounded-3xl text-center group hover:scale-105 transition-transform duration-300"
+                 x-show="inView" 
+                 x-transition:enter="transition ease-out duration-1000 delay-{{ forloop.counter|add:200 }}" 
+                 x-transition:enter-start="opacity-0 transform translate-y-8" 
+                 x-transition:enter-end="opacity-100 transform translate-y-0">
+                <div class="text-4xl md:text-5xl font-black text-fire-accent mb-2 animate-on-scroll" data-count="{{ achievement.number|cut:'+' }}">
+                    0
+                </div>
+                <div class="text-lg font-semibold text-fire-primary">{{ achievement.text }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Company Story -->
+<section class="py-16 bg-fire-bg">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="order-2 lg:order-1">
+                <h2 class="text-3xl md:text-4xl font-black text-fire-primary mb-6">
+                    Наша история
+                </h2>
+                <div class="space-y-6 text-gray-700 leading-relaxed">
+                    {% if company_info and company_info.description %}
+                        <p class="text-lg">{{ company_info.description }}</p>
+                    {% endif %}
+                    
+                    <p>
+                        Компания «Вымпел-45» была основана в {{ company_info.founded_year|default:"1999" }} году как небольшое предприятие 
+                        по изготовлению металлических изделий. За годы работы мы выросли в современную производственную 
+                        компанию, специализирующуюся на противопожарном оборудовании.
+                    </p>
+                    
+                    <p>
+                        Сегодня мы гордимся тем, что наша продукция защищает тысячи объектов по всей России. 
+                        Каждое изделие проходит строгий контроль качества и соответствует всем требованиям 
+                        пожарной безопасности.
+                    </p>
+                    
+                    <p>
+                        Наша миссия — обеспечивать безопасность людей и сохранность имущества через производство 
+                        высококачественных противопожарных систем и оборудования.
+                    </p>
+                </div>
+                
+                <div class="mt-8">
+                    <a href="{% url 'core:catalog' %}" 
+                       class="inline-flex items-center gap-2 px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                        </svg>
+                        Смотреть продукцию
+                    </a>
+                </div>
+            </div>
+            
+            <div class="order-1 lg:order-2 relative">
+                <div class="relative">
+                    <img src="{% static 'images/about-company.jpg' %}" 
+                         alt="О компании {{ company_info.name|default:'Вымпел-45' }}" 
+                         class="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-fire-xl">
+                    
+                    <!-- Floating Achievement Card -->
+                    <div class="absolute -bottom-6 -left-6 bg-white p-6 rounded-2xl shadow-fire-xl animate-float">
+                        <div class="text-3xl font-black text-fire-accent">{{ company_info.experience_years|default:"25" }}+</div>
+                        <div class="text-sm text-gray-600">лет опыта</div>
+                    </div>
+                    
+                    <!-- Quality Badge -->
+                    <div class="absolute top-6 right-6 bg-fire-accent/90 text-white p-4 rounded-xl backdrop-blur-sm">
+                        <div class="text-center">
+                            <svg class="w-8 h-8 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="text-xs font-semibold">Качество ГОСТ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Timeline Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-black text-fire-primary mb-6">
+                Ключевые этапы развития
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Путь от небольшой мастерской до ведущего производителя противопожарного оборудования
+            </p>
+        </div>
+        
+        <div class="space-y-12">
+            <div class="timeline-item">
+                <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire">
+                    <div class="text-2xl font-black text-fire-accent mb-2">{{ company_info.founded_year|default:"1999" }}</div>
+                    <h3 class="text-xl font-bold text-fire-primary mb-3">Основание компании</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Создание небольшого предприятия по производству металлических изделий. 
+                        Первые заказы на изготовление противопожарных дверей для местных предприятий.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire">
+                    <div class="text-2xl font-black text-fire-accent mb-2">2005</div>
+                    <h3 class="text-xl font-bold text-fire-primary mb-3">Расширение производства</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Приобретение современного оборудования и увеличение производственных площадей. 
+                        Получение первых сертификатов качества и безопасности.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire">
+                    <div class="text-2xl font-black text-fire-accent mb-2">2012</div>
+                    <h3 class="text-xl font-bold text-fire-primary mb-3">Модернизация технологий</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Установка высокотехнологичных линий Salvagnini P2Xe. 
+                        Автоматизация производственных процессов и внедрение системы контроля качества.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire">
+                    <div class="text-2xl font-black text-fire-accent mb-2">2018</div>
+                    <h3 class="text-xl font-bold text-fire-primary mb-3">Федеральный масштаб</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Выход на общероссийский рынок. Создание дилерской сети 
+                        и налаживание поставок во все регионы России.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="bg-gradient-to-br from-fire-accent/10 to-white p-8 rounded-3xl shadow-fire border-2 border-fire-accent/20">
+                    <div class="text-2xl font-black text-fire-accent mb-2">{% now "Y" %}</div>
+                    <h3 class="text-xl font-bold text-fire-primary mb-3">Лидер отрасли</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Один из ведущих производителей противопожарного оборудования в России. 
+                        Постоянное развитие и внедрение инновационных решений.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Production Section -->
+<section class="py-16 bg-gradient-to-br from-fire-primary via-slate-800 to-fire-primary relative overflow-hidden parallax-bg">
+    <div class="absolute inset-0 bg-black/50"></div>
+    
+    <div class="relative z-10 max-w-7xl mx-auto px-6">
+        <div class="text-center text-white mb-16">
+            <h2 class="text-3xl md:text-4xl font-black mb-6">
+                Наше производство
+            </h2>
+            <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                Современное оборудование и высококвалифицированные специалисты — 
+                основа качества нашей продукции
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
+                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Современное оборудование</h3>
+                <p class="text-gray-300 leading-relaxed">
+                    Высокотехнологичные линии Salvagnini P2Xe обеспечивают точность изготовления 
+                    и высокое качество продукции
+                </p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
+                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Контроль качества</h3>
+                <p class="text-gray-300 leading-relaxed">
+                    Многоступенчатый контроль качества на всех этапах производства. 
+                    Соответствие ГОСТ и международным стандартам
+                </p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
+                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-4">Опытная команда</h3>
+                <p class="text-gray-300 leading-relaxed">
+                    Квалифицированные инженеры и мастера с многолетним опытом работы 
+                    в сфере пожарной безопасности
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-black text-fire-primary mb-6">
+                Наши ценности
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Принципы, которыми мы руководствуемся в работе
+            </p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire text-center group hover:shadow-fire-lg transition-all duration-300">
+                <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-red-200 transition-colors">
+                    <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-fire-primary mb-4">Безопасность</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Безопасность людей — наш главный приоритет. Каждое изделие создается с пониманием его важности для защиты жизней.
+                </p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire text-center group hover:shadow-fire-lg transition-all duration-300">
+                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-200 transition-colors">
+                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-fire-primary mb-4">Качество</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Непрерывное совершенствование процессов и использование лучших материалов для достижения высочайшего качества.
+                </p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-fire-bg to-white p-8 rounded-3xl shadow-fire text-center group hover:shadow-fire-lg transition-all duration-300">
+                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-200 transition-colors">
+                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-fire-primary mb-4">Инновации</h3>
+                <p class="text-gray-600 leading-relaxed">
+                    Постоянное внедрение новых технологий и разработка современных решений для повышения эффективности.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Certificates Section -->
+<section class="py-16 bg-fire-bg">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl md:text-4xl font-black text-fire-primary mb-6">
+                Сертификаты и лицензии
+            </h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Наша продукция соответствует всем требованиям безопасности и качества
+            </p>
+        </div>
+        
+        <div class="text-center">
+            <a href="{% url 'core:certificates' %}" 
+               class="inline-flex items-center gap-2 px-8 py-4 bg-fire-primary text-white font-bold rounded-full hover:bg-fire-accent transition-all duration-300 btn-glow shadow-fire-lg">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                Смотреть сертификаты
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="py-16 bg-gradient-to-r from-fire-primary to-slate-800">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h3 class="text-3xl md:text-4xl font-black text-white mb-4">
+            Готовы стать партнерами?
+        </h3>
+        <p class="text-lg text-gray-300 mb-8">
+            Свяжитесь с нами для обсуждения сотрудничества и получения индивидуального предложения
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            {% if company_info.phone %}
+            <a href="tel:{{ company_info.phone }}" 
+               class="inline-flex items-center gap-2 px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Позвонить сейчас
+            </a>
+            {% endif %}
+            <a href="{% url 'core:contacts' %}" 
+               class="inline-flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-fire-primary transition-all duration-300">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                </svg>
+                Написать нам
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Анимация счетчиков
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.animate-on-scroll[data-count]');
+        
+        const animateCounter = (element) => {
+            const target = parseInt(element.dataset.count);
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
+            
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current) + (target >= 100 ? '+' : '');
+            }, 16);
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounter(entry.target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        counters.forEach(counter => {
+            observer.observe(counter);
+        });
+    });
+</script>
+{% endblock %}
