@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 /node_modules
 /core/migrations
+/media/certificates
