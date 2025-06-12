@@ -196,3 +196,4 @@ cython_debug/
 /core/migrations
 /media/certificates
 /static
+/media
