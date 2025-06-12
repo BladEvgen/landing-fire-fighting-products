@@ -63,24 +63,35 @@
 </header>
 
 <!-- Mobile Header - Top (minimal) -->
-<div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-orange-100 shadow-lg">
-    <div class="flex items-center justify-between px-4 py-3">
-        <a href="{% url 'core:index' %}" class="flex items-center gap-2">
-            <div class="w-8 h-8">
+<div class="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-orange-100 shadow-lg w-full max-w-full">
+    <div class="flex items-center justify-between px-4 py-3 w-full max-w-full min-w-0">
+        <a href="{% url 'core:index' %}" class="flex items-center gap-2 min-w-0 flex-1 max-w-[calc(100%-4rem)]">
+            <div class="w-8 h-8 flex-shrink-0">
                 <img src="{% static 'images/logo.jpg' %}" alt="Вымпел-45 Logo" class="w-full h-full object-contain">
             </div>
-            <div class="font-brand text-lg font-black text-red-700">
+            <div class="font-brand text-lg font-black text-red-700 truncate min-w-0">
                 {{ company_info.name|default:"Вымпел-45" }}
             </div>
         </a>
         
         {% if company_info.phone %}
-        <a href="tel:{{ company_info.phone|format_phone_link }}" 
-           class="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-300">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <!-- Анимированная иконка телефона -->
+        <a href="tel:{{ company_info.phone|format_phone }}" 
+           class="group relative p-3 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 animate-pulse hover:animate-none flex-shrink-0 w-12 h-12 flex items-center justify-center"
+           x-data="{ isPressed: false }"
+           @click="isPressed = true; setTimeout(() => isPressed = false, 300)"
+           :class="{ 'animate-bounce': isPressed }">
+            
+            <!-- Пульсирующее кольцо -->
+            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400 to-red-500 opacity-75 animate-ping group-hover:animate-none"></div>
+            
+            <!-- Основная иконка -->
+            <svg class="relative w-5 h-5 transform group-hover:rotate-12 transition-transform duration-300" 
+                 fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
             </svg>
-            <span class="text-xs font-medium">{{ company_info.phone|format_phone }}</span>
+            
+
         </a>
         {% endif %}
     </div>
