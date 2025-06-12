@@ -84,4 +84,3 @@ class Command(BaseCommand):
                 return f"{bytes_size:.1f} {unit}"
             bytes_size /= 1024.0
         return f"{bytes_size:.1f} TB"
-

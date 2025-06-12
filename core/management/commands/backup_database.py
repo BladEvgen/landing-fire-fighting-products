@@ -1,9 +1,9 @@
-
 import os
 import subprocess
 from datetime import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
     help = "Создает резервную копию базы данных"

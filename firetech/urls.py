@@ -4,8 +4,8 @@ from django.urls import include, path
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('grappelli/', include('grappelli.urls')), 
-    path('admin/', admin.site.urls),
+    path("grappelli/", include("grappelli.urls")),
+    path("admin/", admin.site.urls),
     path("", include("core.urls")),
 ]
 
@@ -16,6 +16,7 @@ if settings.DEBUG:
 
 if settings.DEBUG:
     import debug_toolbar
+
     urlpatterns = [
-        path('__debug__/', include(debug_toolbar.urls)),
+        path("__debug__/", include(debug_toolbar.urls)),
     ] + urlpatterns

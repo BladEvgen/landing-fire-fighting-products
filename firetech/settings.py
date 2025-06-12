@@ -20,7 +20,9 @@ if not SECRET_KEY:
 DB_TYPE = os.getenv("DB_TYPE", "sqlite3").lower()
 
 
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend"
+)
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
@@ -28,6 +30,7 @@ EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() == "true"
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", f"<{EMAIL_HOST_USER}>")
+
 
 def get_local_ip():
     try:
@@ -39,6 +42,7 @@ def get_local_ip():
         ip_address = "127.0.0.1"
     return ip_address
 
+
 def get_external_ip():
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
@@ -49,6 +53,7 @@ def get_external_ip():
         external_ip = "127.0.0.1"
     return external_ip
 
+
 LOCAL_IP = get_local_ip()
 EXTERNAL_IP = get_external_ip()
 
@@ -58,10 +63,10 @@ if DEBUG:
 else:
     ALLOWED_HOSTS = [
         "vympel45.ru",
-        "www.vympel45.ru", 
+        "www.vympel45.ru",
         os.getenv("DOMAIN_NAME", "example.com"),
         LOCAL_IP,
-        EXTERNAL_IP
+        EXTERNAL_IP,
     ]
 
 # Настройки безопасности для продакшена
@@ -73,25 +78,25 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000  # 1 год
     SECURE_HSTS_PRELOAD = True
     SECURE_SSL_REDIRECT = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
     # Cookies
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_AGE = 3600  # 1 час
-    
+
     CSRF_COOKIE_SECURE = True
     CSRF_COOKIE_HTTPONLY = True
-    CSRF_COOKIE_SAMESITE = 'Lax'
-    
-    X_FRAME_OPTIONS = 'DENY'
-    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
-    
+    CSRF_COOKIE_SAMESITE = "Lax"
+
+    X_FRAME_OPTIONS = "DENY"
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
+
     DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
     DATA_UPLOAD_MAX_NUMBER_FIELDS = 1000
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
-    
+
 else:
     SESSION_COOKIE_AGE = 86400  # 24 часа
     CSRF_COOKIE_AGE = 86400
@@ -113,8 +118,8 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     # Здесь можно добавить сторонние приложения
-    "debug_toolbar", 
-    "django_extensions", 
+    "debug_toolbar",
+    "django_extensions",
 ]
 
 LOCAL_APPS = [
@@ -132,7 +137,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
-
 ]
 
 
@@ -166,11 +170,15 @@ CHANNEL_LAYERS = {
             if DEBUG
             else "channels_redis.core.RedisChannelLayer"
         ),
-        "CONFIG": {} if DEBUG else {
-            "hosts": [("127.0.0.1", 6379)],
-            "capacity": 1500,
-            "expiry": 10,
-        },
+        "CONFIG": (
+            {}
+            if DEBUG
+            else {
+                "hosts": [("127.0.0.1", 6379)],
+                "capacity": 1500,
+                "expiry": 10,
+            }
+        ),
     },
 }
 
@@ -183,7 +191,7 @@ if DEBUG:
             "TIMEOUT": 300,
             "OPTIONS": {
                 "MAX_ENTRIES": 1000,
-            }
+            },
         }
     }
 else:
@@ -213,7 +221,7 @@ if DEBUG:
         "NAME": BASE_DIR / "db.sqlite3",
         "OPTIONS": {
             "timeout": 20,
-        }
+        },
     }
 else:
     if DB_TYPE == "mysql":
@@ -227,7 +235,7 @@ else:
             "OPTIONS": {
                 "charset": "utf8mb4",
                 "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
-            }
+            },
         }
     elif DB_TYPE == "postgresql":
         DATABASES["default"] = {
@@ -239,7 +247,7 @@ else:
             "PORT": os.getenv("DB_PORT", "5432"),
             "OPTIONS": {
                 "sslmode": "prefer",
-            }
+            },
         }
     else:
         raise ValueError(f"Unsupported database type: {DB_TYPE}")
@@ -255,7 +263,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
         "OPTIONS": {
             "min_length": 8,
-        }
+        },
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -277,7 +285,9 @@ STATIC_ROOT = BASE_DIR / "staticroot"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 if not DEBUG:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    STATICFILES_STORAGE = (
+        "django.contrib.staticfiles.storage.ManifestStaticFilesStorage"
+    )
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -285,11 +295,12 @@ MEDIA_ROOT = BASE_DIR / "media"
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
+
 def clean_old_logs(log_directory, days_to_keep=7):
     try:
         now = datetime.now()
         cutoff_date = now - timedelta(days=days_to_keep)
-        
+
         for log_file in log_directory.glob("*.log*"):
             try:
                 file_modified_time = datetime.fromtimestamp(log_file.stat().st_mtime)
@@ -300,6 +311,7 @@ def clean_old_logs(log_directory, days_to_keep=7):
                 print(f"Error processing log file {log_file}: {e}")
     except Exception as e:
         print(f"Error cleaning logs: {e}")
+
 
 clean_old_logs(LOG_DIR, days_to_keep=7)
 
@@ -409,15 +421,15 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10MB
 
-ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
-ALLOWED_DOCUMENT_EXTENSIONS = ['.pdf', '.doc', '.docx']
+ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"]
+ALLOWED_DOCUMENT_EXTENSIONS = [".pdf", ".doc", ".docx"]
 
 GRAPPELLI_ADMIN_TITLE = "Админ-панель Вымпел-45"
 
 # Настройки для отладки (только для разработки)
 if DEBUG:
     INTERNAL_IPS = ["127.0.0.1", LOCAL_IP, EXTERNAL_IP]
-    
+
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 USE_GZIP = True
