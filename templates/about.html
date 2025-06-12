@@ -66,7 +66,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative bg-gradient-to-br from-fire-primary via-slate-800 to-fire-primary py-20 pt-28 overflow-hidden">
+<section class="relative bg-gradient-to-br from-red-700 via-orange-600 to-red-700 py-20 pt-28 overflow-hidden">
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ff6b00" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
     
     <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
@@ -148,7 +148,7 @@
             
             <div class="order-1 lg:order-2 relative">
                 <div class="relative">
-                    <img src="{% static 'images/about-company.jpg' %}" 
+                    <img src="{% static 'images/about-company.png' %}" 
                          alt="О компании {{ company_info.name|default:'Вымпел-45' }}" 
                          class="w-full h-96 lg:h-[500px] object-cover rounded-3xl shadow-fire-xl">
                     
@@ -261,8 +261,8 @@
         
         <div class="grid md:grid-cols-3 gap-8">
             <div class="text-center">
-                <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
-                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30 ">
+                    <svg class="w-10 h-10  text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
                     </svg>
                 </div>
@@ -275,8 +275,9 @@
             
             <div class="text-center">
                 <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
-                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 30 30">
+
+                        <path d="M 26.980469 5.9902344 A 1.0001 1.0001 0 0 0 26.292969 6.2929688 L 11 21.585938 L 4.7070312 15.292969 A 1.0001 1.0001 0 1 0 3.2929688 16.707031 L 10.292969 23.707031 A 1.0001 1.0001 0 0 0 11.707031 23.707031 L 27.707031 7.7070312 A 1.0001 1.0001 0 0 0 26.980469 5.9902344 z"/>
                     </svg>
                 </div>
                 <h3 class="text-xl font-bold text-white mb-4">Контроль качества</h3>
@@ -286,9 +287,10 @@
                 </p>
             </div>
             
+            
             <div class="text-center">
                 <div class="w-20 h-20 bg-fire-accent/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-fire-accent/30">
-                    <svg class="w-10 h-10 text-fire-accent" fill="currentColor" viewBox="0 0 20 20">
+                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                     </svg>
                 </div>
@@ -378,36 +380,7 @@
     </div>
 </section>
 
-<!-- Contact CTA -->
-<section class="py-16 bg-gradient-to-r from-fire-primary to-slate-800">
-    <div class="max-w-4xl mx-auto text-center px-6">
-        <h3 class="text-3xl md:text-4xl font-black text-white mb-4">
-            Готовы стать партнерами?
-        </h3>
-        <p class="text-lg text-gray-300 mb-8">
-            Свяжитесь с нами для обсуждения сотрудничества и получения индивидуального предложения
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            {% if company_info.phone %}
-            <a href="tel:{{ company_info.phone }}" 
-               class="inline-flex items-center gap-2 px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                </svg>
-                Позвонить сейчас
-            </a>
-            {% endif %}
-            <a href="{% url 'core:contacts' %}" 
-               class="inline-flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white font-bold rounded-full hover:bg-white hover:text-fire-primary transition-all duration-300">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                </svg>
-                Написать нам
-            </a>
-        </div>
-    </div>
-</section>
+
 {% endblock %}
 
 {% block extra_js %}
