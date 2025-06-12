@@ -1,4 +1,4 @@
-{% load static %}
+{% load static phone_filters %}
 
 <footer class="relative bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 overflow-hidden">
     <!-- Background fire pattern -->
@@ -51,9 +51,12 @@
                 <!-- Company Info -->
                 <div class="lg:col-span-2 space-y-6">
                     <div class="flex items-start gap-4">
-                        <div class="w-16 h-16 flex-shrink-0 p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl">
-                            <img src="{% static 'images/logo.jpg' %}" alt="Вымпел-45 Logo" class="w-full h-full object-contain filter brightness-0 invert">
+                        <div class="w-14 h-14 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+                            <img src="{% static 'images/logo.jpg' %}" alt="Вымпел-45 Logo"
+                                 class="w-full h-full object-cover rounded-xl" />
                         </div>
+                        
+                        
                         <div>
                             <div class="text-white font-brand text-2xl font-black tracking-tight">
                                 {{ company_info.name|default:"Вымпел-45" }}
@@ -114,19 +117,11 @@
                     <nav class="space-y-3">
                         <a href="{% url 'core:catalog' %}" 
                            class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform {% if request.resolver_match.url_name == 'catalog' %}text-orange-400{% endif %}">
-                            → Противопожарные двери
+                            → Каталог продукции
                         </a>
                         <a href="{% url 'core:catalog' %}" 
-                           class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform">
-                            → Пожарные шкафы
-                        </a>
-                        <a href="{% url 'core:catalog' %}" 
-                           class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform">
-                            → Противопожарные ворота
-                        </a>
-                        <a href="{% url 'core:catalog' %}" 
-                           class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform">
-                            → Металлоконструкции
+                           class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform {% if request.resolver_match.url_name == 'contacts' %}text-orange-400{% endif %}">
+                            → Оставить заявку
                         </a>
                         <a href="{% url 'core:certificates' %}" 
                            class="block text-gray-300 hover:text-orange-400 transition-colors duration-300 py-1 hover:translate-x-1 transform {% if request.resolver_match.url_name == 'certificates' %}text-orange-400{% endif %}">
@@ -152,7 +147,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <div class="font-semibold">{{ company_info.phone }}</div>
+                                <div class="font-semibold">{{  company_info.phone|format_phone }}</div>
                                 <div class="text-sm text-gray-400">Ежедневно с 8:00 до 20:00</div>
                             </div>
                         </a>
@@ -176,7 +171,7 @@
                         
                         {% if company_info.address %}
                         <div class="flex items-start gap-3 text-white p-3 rounded-lg">
-                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mt-1">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mt-1 p-3">
                                 <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                                 </svg>

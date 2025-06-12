@@ -1,64 +1,62 @@
-{% load static %}
+{% load static phone_filters %}
 
-<!-- Desktop Header -->
 <header class="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-orange-100 shadow-lg transition-all duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-        <!-- Logo -->
-        <a href="{% url 'core:index' %}" class="flex items-center gap-3 group">
-            <div class="w-12 h-12 transform group-hover:scale-105 transition-transform duration-300">
-                <img src="{% static 'images/logo.jpg' %}" alt="Вымпел-45 Logo" class="w-full h-full object-contain">
-            </div>
-            <div>
-                <div class="font-brand text-xl font-black tracking-tight text-red-700">
-                    {{ company_info.name|default:"Вымпел-45" }}
-                </div>
-                <div class="text-xs font-medium text-orange-600">
-                    {% if company_info.founded_year %}
-                        С {{ company_info.founded_year }} года
-                    {% else %}
-                        С 1999 года
-                    {% endif %}
-                </div>
-            </div>
+
+    <!-- Logo and Brand -->
+    <a href="{% url 'core:index' %}" class="flex items-center gap-3 group">
+        <div class="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center shadow-md transition-transform group-hover:scale-110 group-hover:shadow-lg duration-300">
+            <img src="{% static 'images/logo.jpg' %}" alt="Вымпел-45 Logo"
+                 class="w-10 h-10 object-cover rounded-lg transition-all duration-300" />
+        </div>
+        <div class="font-brand text-2xl font-black text-red-700 group-hover:text-orange-600 transition-colors duration-300">
+            {{ company_info.name|default:"Вымпел-45" }}
+        </div>
+    </a>
+    
+    
+    <!-- Navigation Menu -->
+    <nav class="flex items-center gap-8">
+        <a href="{% url 'core:index' %}" 
+           class="relative text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 py-2 group {% if request.resolver_match.url_name == 'index' %}text-orange-600{% endif %}">
+            Главная
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full {% if request.resolver_match.url_name == 'index' %}w-full{% endif %}"></span>
         </a>
-
-        <!-- Desktop Navigation -->
-        <nav class="flex items-center gap-8">
-            <a href="{% url 'core:index' %}" 
-               class="relative px-4 py-2 font-semibold text-slate-700 hover:text-orange-600 transition-colors duration-300 group {% if request.resolver_match.url_name == 'index' %}text-orange-600{% endif %}">
-                Главная
-                <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-600 group-hover:w-full group-hover:left-0 transition-all duration-300 {% if request.resolver_match.url_name == 'index' %}w-full left-0{% endif %}"></span>
-            </a>
-            <a href="{% url 'core:catalog' %}" 
-               class="relative px-4 py-2 font-semibold text-slate-700 hover:text-orange-600 transition-colors duration-300 group {% if request.resolver_match.url_name == 'catalog' %}text-orange-600{% endif %}">
-                Каталог
-                <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-600 group-hover:w-full group-hover:left-0 transition-all duration-300 {% if request.resolver_match.url_name == 'catalog' %}w-full left-0{% endif %}"></span>
-            </a>
-            <a href="{% url 'core:about' %}" 
-               class="relative px-4 py-2 font-semibold text-slate-700 hover:text-orange-600 transition-colors duration-300 group {% if request.resolver_match.url_name == 'about' %}text-orange-600{% endif %}">
-                О компании
-                <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-600 group-hover:w-full group-hover:left-0 transition-all duration-300 {% if request.resolver_match.url_name == 'about' %}w-full left-0{% endif %}"></span>
-            </a>
-            <a href="{% url 'core:contacts' %}" 
-               class="relative px-4 py-2 font-semibold text-slate-700 hover:text-orange-600 transition-colors duration-300 group {% if request.resolver_match.url_name == 'contacts' %}text-orange-600{% endif %}">
-                Контакты
-                <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-600 group-hover:w-full group-hover:left-0 transition-all duration-300 {% if request.resolver_match.url_name == 'contacts' %}w-full left-0{% endif %}"></span>
-            </a>
-            <a href="{% url 'core:certificates' %}" 
-               class="relative px-4 py-2 font-semibold text-slate-700 hover:text-orange-600 transition-colors duration-300 group {% if request.resolver_match.url_name == 'certificates' %}text-orange-600{% endif %}">
-                Сертификаты
-                <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-red-600 group-hover:w-full group-hover:left-0 transition-all duration-300 {% if request.resolver_match.url_name == 'certificates' %}w-full left-0{% endif %}"></span>
-            </a>
-        </nav>
-
-        <!-- Contact Button -->
+        
+        <a href="{% url 'core:catalog' %}" 
+           class="relative text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 py-2 group {% if request.resolver_match.url_name == 'catalog' %}text-orange-600{% endif %}">
+            Каталог
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full {% if request.resolver_match.url_name == 'catalog' %}w-full{% endif %}"></span>
+        </a>
+        
+        <a href="{% url 'core:about' %}" 
+           class="relative text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 py-2 group {% if request.resolver_match.url_name == 'about' %}text-orange-600{% endif %}">
+            О компании
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full {% if request.resolver_match.url_name == 'about' %}w-full{% endif %}"></span>
+        </a>
+        
+        <a href="{% url 'core:certificates' %}" 
+           class="relative text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 py-2 group {% if request.resolver_match.url_name == 'certificates' %}text-orange-600{% endif %}">
+            Сертификаты
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full {% if request.resolver_match.url_name == 'certificates' %}w-full{% endif %}"></span>
+        </a>
+        
+        <a href="{% url 'core:contacts' %}" 
+           class="relative text-gray-700 hover:text-orange-600 font-semibold transition-all duration-300 py-2 group {% if request.resolver_match.url_name == 'contacts' %}text-orange-600{% endif %}">
+            Контакты
+            <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-orange-600 transition-all duration-300 group-hover:w-full {% if request.resolver_match.url_name == 'contacts' %}w-full{% endif %}"></span>
+        </a>
+    </nav>
+    
+    <!-- Contact Info -->
+    <div class="flex items-center gap-4">
         {% if company_info.phone %}
-        <a href="tel:{{ company_info.phone }}" 
+        <a href="tel:{{ company_info.phone|format_phone_link }}" 
            class="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl group transform hover:scale-105">
             <svg class="w-4 h-4 group-hover:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
             </svg>
-            <span class="text-sm font-semibold">{{ company_info.phone }}</span>
+            <span class="text-sm font-semibold">{{ company_info.phone|format_phone }}</span>
         </a>
         {% endif %}
     </div>
@@ -77,12 +75,12 @@
         </a>
         
         {% if company_info.phone %}
-        <a href="tel:{{ company_info.phone }}" 
+        <a href="tel:{{ company_info.phone|format_phone_link }}" 
            class="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold rounded-lg text-sm shadow-md hover:shadow-lg transition-all duration-300">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
             </svg>
-            Звонок
+            <span class="text-xs font-medium">{{ company_info.phone|format_phone }}</span>
         </a>
         {% endif %}
     </div>
