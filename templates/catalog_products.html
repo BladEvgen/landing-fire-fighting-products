@@ -1,0 +1,162 @@
+{% load static %}
+
+{% if products %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
+        {% for product in products %}
+            <div
+                x-data="{ hover: false }"
+                class="group bg-white rounded-3xl shadow-lg hover:shadow-2xl border border-gray-100 hover:border-orange-300 transition-all duration-400 overflow-hidden relative hover:-translate-y-2"
+                @mouseenter="hover = true"
+                @mouseleave="hover = false"
+            >
+                <!-- Product Image -->
+                <div class="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                    {% if product.images.first %}
+                        <img src="{{ product.images.first.image.url }}"
+                             alt="{{ product.name }}"
+                             class="w-full h-full object-contain bg-white transition-all duration-700 ease-in-out group-hover:scale-105 group-hover:shadow-lg"
+                             loading="lazy"
+                             :class="hover ? 'opacity-100 scale-105' : 'opacity-100 scale-100'">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                            <i class="fa-regular fa-image text-5xl text-gray-300"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Badges -->
+                    <div class="absolute top-3 left-3 flex flex-col gap-2 z-10">
+                        {% if product.is_featured %}
+                            <span class="flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-fade-in">
+                                <i class="fa-solid fa-star mr-1 text-yellow-300 animate-pulse"></i> Хит
+                            </span>
+                        {% endif %}
+                        {% if product.is_new %}
+                            <span class="flex items-center gap-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-fade-in">
+                                <i class="fa-solid fa-bolt mr-1 text-yellow-100 animate-bounce"></i> Новинка
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Quick View Button -->
+                    <div class="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                        <a href="{% url 'core:product_detail' product.slug %}"
+                           class="bg-white/90 text-gray-900 px-6 py-3 rounded-2xl font-bold shadow-xl transition-all duration-300
+                           opacity-0 group-hover:opacity-100 translate-y-6 group-hover:translate-y-0 pointer-events-auto
+                           hover:bg-orange-500 hover:text-white hover:shadow-2xl hover:scale-105 flex items-center gap-2"
+                           tabindex="-1"
+                        >
+                            <i class="fa-regular fa-eye"></i> Подробнее
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Product Info -->
+                <div class="p-6 flex flex-col h-full justify-between">
+                    <!-- Categories -->
+                    {% if product.categories.all %}
+                        <div class="flex flex-wrap gap-1 mb-3">
+                            {% for category in product.categories.all %}
+                                <span class="bg-orange-50 text-orange-700 px-2 py-1 rounded-lg text-xs font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-tag"></i> {{ category.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Product Name -->
+                    <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors duration-200">
+                        {{ product.name }}
+                    </h3>
+                    
+                    <!-- Short Description -->
+                    {% if product.short_description %}
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+                            {{ product.short_description }}
+                        </p>
+                    {% endif %}
+                    
+                    <!-- Tags -->
+                    {% if product.tags.all %}
+                        <div class="flex flex-wrap gap-1 mb-2">
+                            {% for tag in product.tags.all %}
+                                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-xs flex items-center gap-1">
+                                    <i class="fa-solid fa-hashtag"></i>{{ tag.name }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Action Button -->
+                    <div class="pt-4 border-t border-gray-100 mt-auto">
+                        <a href="{% url 'core:product_detail' product.slug %}" 
+                           class="block w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-center py-3 rounded-2xl font-bold transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-2xl flex items-center justify-center gap-2 group">
+                            <i class="fa-solid fa-arrow-right-long animate-fade-in"></i> Узнать больше
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if products.has_other_pages %}
+        <div class="mt-16 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if products.has_previous %}
+                    <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.featured %}featured={{ request.GET.featured }}&{% endif %}{% if request.GET.new %}new={{ request.GET.new }}&{% endif %}page={{ products.previous_page_number }}"
+                       class="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-orange-50 hover:text-orange-500 transition-colors font-medium flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Назад
+                    </a>
+                {% endif %}
+                
+                {% for page_num in products.paginator.page_range %}
+                    {% if page_num == products.number %}
+                        <span class="px-4 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold shadow-lg animate-fade-in flex items-center justify-center">
+                            {{ page_num }}
+                        </span>
+                    {% elif page_num > products.number|add:'-3' and page_num < products.number|add:'3' %}
+                        <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.featured %}featured={{ request.GET.featured }}&{% endif %}{% if request.GET.new %}new={{ request.GET.new }}&{% endif %}page={{ page_num }}"
+                           class="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-orange-50 hover:text-orange-500 hover:border-orange-300 transition-all font-medium flex items-center justify-center">
+                            {{ page_num }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if products.has_next %}
+                    <a href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.category %}category={{ request.GET.category }}&{% endif %}{% if request.GET.tag %}tag={{ request.GET.tag }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}{% if request.GET.featured %}featured={{ request.GET.featured }}&{% endif %}{% if request.GET.new %}new={{ request.GET.new }}&{% endif %}page={{ products.next_page_number }}"
+                       class="px-4 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-orange-50 hover:text-orange-500 transition-colors font-medium flex items-center gap-2">
+                        Вперед <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    {% endif %}
+    
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-20">
+        <div class="max-w-md mx-auto">
+            <div class="mb-8">
+                <i class="fa-regular fa-box-open text-7xl text-gray-200 animate-pulse"></i>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-gray-900 mb-4">Товары не найдены</h3>
+            
+            <p class="text-gray-600 mb-8 leading-relaxed">
+                К сожалению, по вашему запросу товаров не найдено.<br>
+                Попробуйте изменить параметры поиска или сбросить фильтры.
+            </p>
+            
+            <div class="space-y-4">
+                <button @click="clearFilters()" 
+                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl font-bold hover:from-orange-600 hover:to-red-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 gap-2">
+                    <i class="fa-solid fa-broom"></i> Сбросить все фильтры
+                </button>
+                
+                <div class="text-sm text-gray-500">
+                    или <a href="{% url 'core:catalog' %}" class="text-orange-600 hover:text-orange-700 font-medium">перейти ко всем товарам</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}

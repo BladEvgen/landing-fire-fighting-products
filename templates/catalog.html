@@ -1,368 +1,328 @@
 {% extends "base/base.html" %}
-{% load static %}
+{% load static phone_filters %}
 
-{% block title %}Каталог продукции | {{ company_info.name|default:"Вымпел-45" }}{% endblock %}
+{% block title %}
+{% if selected_category %}{{ selected_category.name }} - {% endif %}
+Каталог продукции {{ company_info.name|default:"Вымпел-45" }}
+{% endblock %}
 
-{% block description %}Каталог противопожарных металлоизделий: двери, шкафы, щиты, ворота. Сертифицированная продукция с гарантией качества.{% endblock %}
-
-{% block extra_css %}
-<style>
-    .filter-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .product-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 2rem;
-    }
-    
-    @media (max-width: 768px) {
-        .product-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-    }
-</style>
+{% block meta_description %}
+{% if selected_category %}
+{{ selected_category.description|default:"Каталог продукции в категории "|add:selected_category.name }}
+{% else %}
+Полный каталог противопожарного оборудования и металлоизделий от производителя. Сертифицированная продукция высокого качества.
+{% endif %}
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="relative bg-gradient-to-br from-fire-primary via-slate-800 to-fire-primary py-20 pt-28 overflow-hidden">
-    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ff6b00" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-    
-    <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
-        <h1 class="text-4xl md:text-6xl font-black text-white mb-6">
-            Каталог продукции
-        </h1>
-        <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-            Полный ассортимент сертифицированных противопожарных металлоизделий
-        </p>
-        
-        <!-- Search Form -->
-        <div class="max-w-2xl mx-auto">
-            <form method="GET" class="flex gap-2">
-                <div class="flex-1 relative">
-                    <input type="text" 
-                           name="search" 
-                           value="{{ search_query }}"
-                           placeholder="Поиск по каталогу..." 
-                           class="w-full px-6 py-4 rounded-full bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-fire-accent focus:border-transparent backdrop-blur-md">
-                    <svg class="absolute right-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </div>
-                <button type="submit" class="px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
-                    Найти
-                </button>
-            </form>
-        </div>
-    </div>
-</section>
-
-<!-- Filters and Products -->
-<section class="py-12">
-    <div class="max-w-7xl mx-auto px-6">
-        
-        <!-- Filters -->
-        <div class="grid lg:grid-cols-4 gap-8">
-            <!-- Sidebar Filters -->
-            <div class="lg:col-span-1">
-                <div class="sticky top-24 space-y-6">
-                    
-                    <!-- Categories Filter -->
-                    {% if categories %}
-                    <div class="filter-card p-6 rounded-2xl shadow-fire">
-                        <h3 class="text-lg font-bold text-fire-primary mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                            Категории
-                        </h3>
-                        <div class="space-y-2">
-                            <a href="{% url 'core:catalog' %}" 
-                               class="block px-3 py-2 rounded-lg transition-colors hover:bg-fire-bg {% if not current_category %}bg-fire-accent text-white{% else %}text-gray-700 hover:text-fire-primary{% endif %}">
-                                Все категории
-                            </a>
-                            {% for category in categories %}
-                            <a href="{% url 'core:catalog' %}?category={{ category.slug }}" 
-                               class="block px-3 py-2 rounded-lg transition-colors hover:bg-fire-bg {% if current_category == category.slug %}bg-fire-accent text-white{% else %}text-gray-700 hover:text-fire-primary{% endif %}">
-                                {{ category.name }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Tags Filter -->
-                    {% if tags %}
-                    <div class="filter-card p-6 rounded-2xl shadow-fire">
-                        <h3 class="text-lg font-bold text-fire-primary mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
-                            </svg>
-                            Теги
-                        </h3>
-                        <div class="flex flex-wrap gap-2">
-                            {% for tag in tags %}
-                            <a href="{% url 'core:catalog' %}?tag={{ tag.slug }}" 
-                               class="inline-block px-3 py-1 text-sm rounded-full border transition-colors {% if current_tag == tag.slug %}bg-fire-accent text-white border-fire-accent{% else %}border-gray-300 text-gray-700 hover:border-fire-accent hover:text-fire-accent{% endif %}">
-                                {{ tag.name }}
-                            </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Sort Filter -->
-                    <div class="filter-card p-6 rounded-2xl shadow-fire">
-                        <h3 class="text-lg font-bold text-fire-primary mb-4 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                            Сортировка
-                        </h3>
-                        <form method="GET" id="sort-form">
-                            {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
-                            {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
-                            {% if current_tag %}<input type="hidden" name="tag" value="{{ current_tag }}">{% endif %}
-                            
-                            <select name="sort" onchange="document.getElementById('sort-form').submit()" 
-                                    class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-fire-accent focus:border-transparent">
-                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>По названию</option>
-                                <option value="price" {% if sort_by == 'price' %}selected{% endif %}>По цене (возрастание)</option>
-                                <option value="-price" {% if sort_by == '-price' %}selected{% endif %}>По цене (убывание)</option>
-                                <option value="-created_at" {% if sort_by == '-created_at' %}selected{% endif %}>Сначала новые</option>
-                            </select>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Products Grid -->
-            <div class="lg:col-span-3">
-                <!-- Results Info -->
-                <div class="flex justify-between items-center mb-8">
-                    <div>
-                        <h2 class="text-2xl font-bold text-fire-primary">
-                            {% if search_query %}
-                                Результаты поиска: "{{ search_query }}"
-                            {% elif current_category %}
-                                {{ categories|dictsort:"slug"|dictsortreversed:"slug"|first.name }}
-                            {% else %}
-                                Вся продукция
-                            {% endif %}
-                        </h2>
-                        <p class="text-gray-600 mt-1">
-                            Найдено: {{ total_count }} товар{{ total_count|pluralize:",,ов" }}
-                        </p>
-                    </div>
-                    
-                    <!-- View Toggle -->
-                    <div class="hidden md:flex gap-2">
-                        <button class="p-2 bg-fire-accent text-white rounded-lg">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                            </svg>
-                        </button>
-                        <button class="p-2 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Products -->
-                {% if products %}
-                <div class="product-grid">
-                    {% for product in products %}
-                    <div class="bg-white rounded-2xl shadow-fire hover:shadow-fire-lg transition-all duration-500 overflow-hidden group card-hover animate-on-scroll">
-                        <div class="relative overflow-hidden">
-                            {% if product.main_image %}
-                                <img src="{{ product.main_image.url }}" 
-                                     alt="{{ product.name }}" 
-                                     class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-700">
-                            {% else %}
-                                <div class="w-full h-64 bg-gradient-to-br from-fire-bg to-gray-200 flex items-center justify-center">
-                                    <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                            {% endif %}
-                            
-                            <!-- Badges -->
-                            <div class="absolute top-4 left-4 flex flex-col gap-2">
-                                {% if product.is_featured %}
-                                <span class="bg-fire-accent text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                    Хит продаж
-                                </span>
-                                {% endif %}
-                                {% if product.is_new %}
-                                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                    Новинка
-                                </span>
-                                {% endif %}
-                                {% if not product.in_stock %}
-                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                                    Под заказ
-                                </span>
-                                {% endif %}
-                            </div>
-                            
-                            <!-- Tags -->
-                            {% if product.tags.exists %}
-                            <div class="absolute top-4 right-4">
-                                <div class="flex flex-wrap gap-1">
-                                    {% for tag in product.tags.all|slice:":2" %}
-                                    <span class="bg-black/20 text-white px-2 py-1 rounded text-xs backdrop-blur-sm">
-                                        {{ tag.name }}
-                                    </span>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                            {% endif %}
-                            
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                        
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-fire-primary mb-2 group-hover:text-fire-accent transition-colors">
-                                {{ product.name }}
-                            </h3>
-                            
-                            {% if product.short_description %}
-                            <p class="text-gray-600 mb-4 leading-relaxed">
-                                {{ product.short_description|truncatewords:20 }}
-                            </p>
-                            {% endif %}
-                            
-                            <!-- Categories -->
-                            {% if product.categories.exists %}
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                {% for category in product.categories.all|slice:":2" %}
-                                <span class="bg-fire-bg text-fire-primary px-2 py-1 rounded text-xs">
-                                    {{ category.name }}
-                                </span>
-                                {% endfor %}
-                            </div>
-                            {% endif %}
-                            
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    {% if product.price %}
-                                        <span class="text-fire-accent font-bold text-xl">{{ product.display_price }}</span>
-                                    {% else %}
-                                        <span class="text-gray-500 text-sm">Цена по запросу</span>
-                                    {% endif %}
-                                </div>
-                                <a href="{{ product.get_absolute_url }}" 
-                                   class="px-6 py-2 bg-fire-primary text-white rounded-full hover:bg-fire-accent transition-colors duration-300 btn-glow">
-                                    Подробнее
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- Pagination -->
-                {% if page_obj.has_other_pages %}
-                <div class="mt-12 flex justify-center">
-                    <nav class="flex items-center gap-2">
-                        {% if page_obj.has_previous %}
-                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.previous_page_number }}" 
-                               class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-fire-accent hover:text-white hover:border-fire-accent transition-colors">
-                                ← Предыдущая
-                            </a>
-                        {% endif %}
-                        
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <span class="px-4 py-2 bg-fire-accent text-white rounded-lg font-bold">{{ num }}</span>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ num }}" 
-                                   class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-fire-accent hover:text-white hover:border-fire-accent transition-colors">
-                                    {{ num }}
-                                </a>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if page_obj.has_next %}
-                            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if current_category %}category={{ current_category }}&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}{% if sort_by %}sort={{ sort_by }}&{% endif %}page={{ page_obj.next_page_number }}" 
-                               class="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg hover:bg-fire-accent hover:text-white hover:border-fire-accent transition-colors">
-                                Следующая →
-                            </a>
-                        {% endif %}
-                    </nav>
-                </div>
-                {% endif %}
-                
+<!-- Header Section -->
+<section class="relative bg-gradient-to-br from-slate-900 via-red-900 to-orange-900 py-20 pt-28 overflow-hidden">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="relative max-w-7xl mx-auto px-6 text-center">
+        <div class="space-y-6">
+            <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight animate-fade-in">
+                {% if selected_category %}
+                    {{ selected_category.name }}
                 {% else %}
-                <!-- No Products Found -->
-                <div class="text-center py-16">
-                    <svg class="w-24 h-24 text-gray-400 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                    </svg>
-                    <h3 class="text-2xl font-bold text-gray-600 mb-4">Товары не найдены</h3>
-                    <p class="text-gray-500 mb-6">Попробуйте изменить параметры поиска или сбросить фильтры</p>
-                    <a href="{% url 'core:catalog' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-fire-accent text-white rounded-full hover:bg-orange-600 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Сбросить фильтры
-                    </a>
-                </div>
+                    Каталог продукции
                 {% endif %}
-            </div>
+            </h1>
+            <p class="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed animate-fade-in">
+                {% if selected_category and selected_category.description %}
+                    {{ selected_category.description }}
+                {% else %}
+                    Полный каталог нашей сертифицированной продукции для обеспечения пожарной безопасности
+                {% endif %}
+            </p>
+            <!-- Breadcrumbs -->
+            <nav class="flex justify-center pt-4">
+                <ol class="flex items-center space-x-2 text-sm text-gray-300 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-600/30">
+                    <li>
+                        <a href="{% url 'core:index' %}" class="flex items-center gap-1 hover:text-orange-300 transition-colors">
+                            <i class="fa-solid fa-house"></i> Главная
+                        </a>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-chevron-right text-xs mx-1"></i>
+                    </li>
+                    {% if selected_category %}
+                        <li>
+                            <a href="{% url 'core:catalog' %}" class="hover:text-orange-300 transition-colors">Каталог</a>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-chevron-right text-xs mx-1"></i>
+                        </li>
+                        <li class="text-orange-300 font-bold">{{ selected_category.name }}</li>
+                    {% else %}
+                        <li class="text-orange-300 font-bold">Каталог</li>
+                    {% endif %}
+                </ol>
+            </nav>
         </div>
     </div>
 </section>
 
-<!-- CTA Section -->
-<section class="py-16 bg-gradient-to-r from-fire-primary to-slate-800">
-    <div class="max-w-4xl mx-auto text-center px-6">
-        <h3 class="text-3xl md:text-4xl font-black text-white mb-4">
-            Не нашли нужный товар?
-        </h3>
-        <p class="text-lg text-gray-300 mb-6">
-            Мы изготавливаем изделия по индивидуальным размерам и техническим требованиям
-        </p>
-        <a href="{% url 'core:contacts' %}" class="inline-flex items-center gap-2 px-8 py-4 bg-fire-accent text-white font-bold rounded-full hover:bg-orange-600 transition-all duration-300 btn-glow">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-            </svg>
-            Заказать расчет
-        </a>
+<!-- Main Content -->
+<section class="py-16 bg-gray-50 min-h-screen" x-data="catalogFilter()">
+    <div class="max-w-7xl mx-auto px-6">
+        <!-- Filters and Search -->
+        <div class="bg-white rounded-3xl shadow-xl p-8 mb-8 border border-gray-100 animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Search -->
+                <div class="lg:col-span-1">
+                    <label class="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass text-orange-500"></i> Поиск продукции
+                    </label>
+                    <div class="relative">
+                        <input type="text"
+                               x-model="filters.search"
+                               @input.debounce.500ms="applyFilters()"
+                               placeholder="Введите название..."
+                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 pl-12 text-gray-700"
+                        >
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="lg:col-span-1">
+                    <label class="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-orange-500"></i> Категория
+                    </label>
+                    <select x-model="filters.category"
+                            @change="applyFilters()"
+                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 text-gray-700"
+                    >
+                        <option value="">Все категории</option>
+                        {% for category in categories %}
+                        <option value="{{ category.slug }}" {% if selected_category and selected_category.slug == category.slug %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tag Filter -->
+                <div class="lg:col-span-1">
+                    <label class="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-tags text-orange-500"></i> Тип
+                    </label>
+                    <select x-model="filters.tag"
+                            @change="applyFilters()"
+                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 text-gray-700"
+                    >
+                        <option value="">Все типы</option>
+                        {% for tag in tags %}
+                        <option value="{{ tag.slug }}">{{ tag.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort -->
+                <div class="lg:col-span-1">
+                    <label class="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-down-wide-short text-orange-500"></i> Сортировка
+                    </label>
+                    <select x-model="filters.sort"
+                            @change="applyFilters()"
+                            class="w-full px-5 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200 text-gray-700"
+                    >
+                        <option value="name">По названию (А-Я)</option>
+                        <option value="name_desc">По названию (Я-А)</option>
+                        <option value="featured">Сначала рекомендуемые</option>
+                        <option value="new">Сначала новинки</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Quick Filters -->
+            <div class="flex flex-wrap gap-4 mt-8 pt-6 border-t border-gray-100">
+                <button @click="toggleFeatured()"
+                        :class="filters.featured ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-orange-100'"
+                        class="px-6 py-3 rounded-2xl font-bold transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-star"></i>
+                    Рекомендуемые ({{ featured_count }})
+                </button>
+                <button @click="toggleNew()"
+                        :class="filters.new ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-green-100'"
+                        class="px-6 py-3 rounded-2xl font-bold transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    Новинки ({{ new_count }})
+                </button>
+                <button @click="clearFilters()"
+                        class="px-6 py-3 bg-gradient-to-r from-red-100 to-pink-100 text-red-700 hover:from-red-200 hover:to-pink-200 rounded-2xl font-bold transition-all duration-200 flex items-center gap-2">
+                    <i class="fa-solid fa-broom"></i>
+                    Сбросить фильтры
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Info -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 animate-fade-in">
+            <div class="text-gray-600">
+                <span class="text-2xl font-bold text-gray-900" x-text="productsCount">{{ products_count }}</span>
+                <span class="text-lg">
+                    {% if products_count == 1 %}товар найден{% elif products_count >= 2 and products_count <= 4 %}товара найдено{% else %}товаров найдено{% endif %}
+                </span>
+                {% if search_query %}
+                    <div class="mt-1">
+                        по запросу <span class="font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">"{{ search_query }}"</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div x-show="loading" class="flex justify-center items-center py-20">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange-200 border-t-orange-500"></div>
+                <span class="text-lg font-medium text-gray-600">Загрузка товаров...</span>
+            </div>
+        </div>
+
+        <!-- Products Container -->
+        <div id="products-container" x-show="!loading">
+            {% include 'catalog_products.html' %}
+        </div>
     </div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Анимация появления карточек товаров
-    document.addEventListener('DOMContentLoaded', function() {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
-                    observer.unobserve(entry.target);
+    function catalogFilter() {
+        const productsCountStr = "{{ products_count|default:'0' }}";
+        const searchQueryStr = "{{ search_query|default:''|escapejs }}";
+        const selectedCategorySlug = "{{ selected_category.slug|default:''|escapejs }}";
+        const selectedTagSlug = "{{ selected_tag.slug|default:''|escapejs }}";
+        const sortByStr = "{{ sort_by|default:'name'|escapejs }}";
+        const showFeaturedStr = "{{ show_featured|yesno:'true,false,false' }}";
+        const showNewStr = "{{ show_new|yesno:'true,false,false' }}";
+        
+        return {
+            loading: false,
+            productsCount: parseInt(productsCountStr) || 0,
+            filters: {
+                search: searchQueryStr || '',
+                category: selectedCategorySlug || '',
+                tag: selectedTagSlug || '',
+                sort: sortByStr || 'name',
+                featured: showFeaturedStr === 'true',
+                new: showNewStr === 'true'
+            },
+            
+            applyFilters() {
+                this.loading = true;
+                
+                const params = new URLSearchParams();
+                if (this.filters.search && this.filters.search.trim()) {
+                    params.set('search', this.filters.search.trim());
                 }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.animate-on-scroll').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
+                if (this.filters.category) {
+                    params.set('category', this.filters.category);
+                }
+                if (this.filters.tag) {
+                    params.set('tag', this.filters.tag);
+                }
+                if (this.filters.sort && this.filters.sort !== 'name') {
+                    params.set('sort', this.filters.sort);
+                }
+                if (this.filters.featured) {
+                    params.set('featured', '1');
+                }
+                if (this.filters.new) {
+                    params.set('new', '1');
+                }
+                
+                const url = new URL(window.location);
+                url.search = params.toString();
+                
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById('products-container');
+                    if (container && data.html) {
+                        container.innerHTML = data.html;
+                    }
+                    
+                    if (data.products_count !== undefined) {
+                        this.productsCount = parseInt(data.products_count) || 0;
+                    }
+                    
+                    this.loading = false;
+                    
+                    window.history.pushState({}, '', url);
+                })
+                .catch(error => {
+                    console.error('Error loading products:', error);
+                    this.loading = false;
+                    
+                    // Fallback to page reload on error
+                    window.location.href = url;
+                });
+            },
+            
+            toggleFeatured() {
+                this.filters.featured = !this.filters.featured;
+                this.applyFilters();
+            },
+            
+            toggleNew() {
+                this.filters.new = !this.filters.new;
+                this.applyFilters();
+            },
+            
+            clearFilters() {
+                this.filters = {
+                    search: '',
+                    category: '',
+                    tag: '',
+                    sort: 'name',
+                    featured: false,
+                    new: false
+                };
+                this.applyFilters();
+            }
+        }
+    }
+    
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(e) {
+        window.location.reload();
+    });
+    
+    // Initialize filters from URL on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const searchInput = document.querySelector('input[x-model="filters.search"]');
+        if (searchInput && urlParams.get('search')) {
+            searchInput.value = urlParams.get('search');
+        }
+        
+        const categorySelect = document.querySelector('select[x-model="filters.category"]');
+        if (categorySelect && urlParams.get('category')) {
+            categorySelect.value = urlParams.get('category');
+        }
+        
+        const tagSelect = document.querySelector('select[x-model="filters.tag"]');
+        if (tagSelect && urlParams.get('tag')) {
+            tagSelect.value = urlParams.get('tag');
+        }
+        
+        const sortSelect = document.querySelector('select[x-model="filters.sort"]');
+        if (sortSelect && urlParams.get('sort')) {
+            sortSelect.value = urlParams.get('sort');
+        }
     });
 </script>
 {% endblock %}
