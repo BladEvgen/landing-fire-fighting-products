@@ -1,0 +1,262 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Общая статистика</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #2196f3;">{{ total_products }}</h3>
+            <p style="margin: 0; color: #666;">Всего товаров</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #4caf50;">{{ active_products }}</h3>
+            <p style="margin: 0; color: #666;">Активных товаров</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #ff9800;">{{ featured_products }}</h3>
+            <p style="margin: 0; color: #666;">Рекомендуемых</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #9c27b0;">{{ total_categories }}</h3>
+            <p style="margin: 0; color: #666;">Категорий</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #607d8b;">{{ total_certificates }}</h3>
+            <p style="margin: 0; color: #666;">Сертификатов</p>
+        </div>
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
+            <h3 style="margin: 0 0 10px 0; color: #795548;">{{ total_contacts }}</h3>
+            <p style="margin: 0; color: #666;">Всего заявок</p>
+        </div>
+    </div>
+</div>
+
+<div class="module">
+    <h2>Заявки</h2>
+    <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+        <strong>Новых заявок: {{ new_contacts }}</strong>
+        {% if new_contacts > 0 %}
+            <p style="margin: 10px 0 0 0;">
+                <a href="{% url 'admin:core_contactform_changelist' %}?status=new" class="button">
+                    Просмотреть новые заявки
+                </a>
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="module">
+    <h2>Быстрые действия</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <h4>Товары</h4>
+            <p><a href="{% url 'admin:core_product_add' %}">+ Добавить товар</a></p>
+            <p><a href="{% url 'admin:core_product_changelist' %}">Управление товарами</a></p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <h4>Категории</h4>
+            <p><a href="{% url 'admin:core_category_add' %}">+ Добавить категорию</a></p>
+            <p><a href="{% url 'admin:core_category_changelist' %}">Управление категориями</a></p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <h4>Сертификаты</h4>
+            <p><a href="{% url 'admin:core_certificate_add' %}">+ Добавить сертификат</a></p>
+            <p><a href="{% url 'admin:core_certificate_changelist' %}">Управление сертификатами</a></p>
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <h4>Заявки</h4>
+            <p><a href="{% url 'admin:core_contactform_changelist' %}?status=new">Новые заявки</a></p>
+            <p><a href="{% url 'admin:core_contactform_changelist' %}">Все заявки</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- ================================ -->
+
+<!-- templates/admin/backup.html -->
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="module">
+    <h2>Создание резервной копии</h2>
+    
+    <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; border-left: 4px solid #17a2b8; margin: 20px 0;">
+        <h4 style="margin: 0 0 10px 0;">Что включается в резервную копию:</h4>
+        <ul style="margin: 0; padding-left: 20px;">
+            <li>Все товары и их изображения</li>
+            <li>Категории и теги</li>
+            <li>Сертификаты</li>
+            <li>Заявки клиентов</li>
+            <li>Информация о компании</li>
+            <li>Настройки пользователей</li>
+        </ul>
+    </div>
+
+    <form method="post" style="margin: 20px 0;">
+        {% csrf_token %}
+        
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h4>Параметры резервного копирования:</h4>
+            
+            <div style="margin: 15px 0;">
+                <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" name="include_images" checked> 
+                    Включить изображения товаров и сертификатов
+                </label>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" name="include_contacts" checked> 
+                    Включить заявки клиентов
+                </label>
+            </div>
+            
+            <div style="margin: 15px 0;">
+                <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" name="include_users"> 
+                    Включить пользователей и их настройки
+                </label>
+            </div>
+        </div>
+
+        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin: 20px 0;">
+            <strong>Внимание:</strong> Создание полной резервной копии может занять несколько минут, 
+            особенно если включены изображения.
+        </div>
+
+        <div style="margin: 20px 0;">
+            <button type="submit" class="default" style="background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">
+                Создать резервную копию
+            </button>
+            <a href="{% url 'admin:index' %}" class="button" style="margin-left: 10px;">Отмена</a>
+        </div>
+    </form>
+
+    <div style="margin-top: 30px;">
+        <h3>Последние резервные копии</h3>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+            <p style="color: #666; margin: 0;">
+                Здесь будет отображаться список последних созданных резервных копий.
+                <br>
+                <small>Функционал в разработке</small>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- ================================ -->
+
+<!-- templates/admin/core/contactform/change_list.html -->
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .statistics-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0 0 0;
+        }
+        .week-chart {
+            margin: 15px 0;
+            display: flex;
+            align-items: end;
+            gap: 5px;
+            height: 60px;
+        }
+        .week-bar {
+            background: #007cba;
+            min-height: 5px;
+            flex: 1;
+            border-radius: 2px 2px 0 0;
+            position: relative;
+            cursor: pointer;
+        }
+        .week-bar:hover::after {
+            content: attr(data-count);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: black;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+    </style>
+{% endblock %}
+
+{% block result_list %}
+    {% if status_statistics %}
+    <div class="statistics-panel">
+        {% for status_name, count in status_statistics.items %}
+        <div class="stat-item">
+            <div class="stat-number">{{ count }}</div>
+            <div class="stat-label">{{ status_name }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if week_statistics %}
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h4 style="margin: 0 0 10px 0;">Заявки за последние 7 дней:</h4>
+        <div class="week-chart">
+            {% for day in week_statistics %}
+            <div class="week-bar" 
+                 style="height: {% if day.count > 0 %}{{ day.count|add:"5" }}{% else %}5{% endif %}px;" 
+                 data-count="{{ day.count }} ({{ day.date }})"
+                 title="{{ day.count }} заявок - {{ day.date }}">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {{ block.super }}
+{% endblock %}

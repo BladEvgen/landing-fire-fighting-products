@@ -1,10 +1,14 @@
 from django.contrib import admin
 from django.conf import settings
 from django.urls import include, path
+from core.admin import CompanyAdminGroup
 from django.conf.urls.static import static
+
 
 urlpatterns = [
     path("grappelli/", include("grappelli.urls")),
+    path('admin/company/statistics/', CompanyAdminGroup.statistics_view, name='admin_company_statistics'),
+    path('admin/company/backup/', CompanyAdminGroup.backup_view, name='admin_company_backup'),
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
 ]
