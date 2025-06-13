@@ -182,7 +182,7 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="relative bg-gradient-to-br from-red-700 via-orange-600 to-red-700 py-20 pt-28 overflow-hidden">
+<section class="relative bg-gradient-to-br from-slate-900 via-red-900 to-orange-900  py-20 pt-28 overflow-hidden">
     <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ff6b00" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
     
     <div class="relative z-10 max-w-7xl mx-auto px-6 text-center">
@@ -486,6 +486,21 @@
 
 {% block extra_js %}
 <script>
+
+    document.querySelectorAll('.certificate-card').forEach(card => {
+        card.addEventListener('click', function(e){
+            if (window.innerWidth <= 600) return;
+            const id = card.dataset.certId || '';
+            const name = card.dataset.certName || '';
+            const desc = card.dataset.certDesc || '';
+            const img = card.dataset.certImage || '';
+            const file = card.dataset.certFile || '';
+            const issued = card.dataset.certIssued || '';
+            const expiry = card.dataset.certExpiry || '';
+            openCertificateModal(id, name, desc, img, file, issued, expiry);
+        });
+    });
+    
     function openCertificateModal(id, name, description, imageUrl, fileUrl, issuedDate, expiryDate) {
         const modal = document.getElementById('certificateModal');
         const modalTitle = document.getElementById('modalTitle');
