@@ -5,6 +5,327 @@
 
 {% block meta_description %}{{ company_info.meta_description|default:"Производство высококачественных металлокорпусных изделий пожарно-технического назначения. Более 25 лет на рынке. Противопожарные двери, шкафы, ворота." }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    .production-image {
+        transition: object-position 0.3s ease;
+    }
+    
+    @media (max-width: 640px) {
+        .production-image {
+            object-position: 25% center; 
+        }
+        .certificates-carousel {
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+    }
+    
+    @media (min-width: 641px) and (max-width: 768px) {
+        .production-image {
+            object-position: 35% center;
+        }
+    }
+    
+    @media (min-width: 769px) {
+        .production-image {
+            object-position: center center; 
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .production-image {
+            object-position: 50% center; 
+            height: 300px; 
+        }
+    }
+    
+    .production-image {
+        opacity: 0;
+        animation: fadeInImage 1s ease-out 0.5s forwards;
+    }
+    
+    @keyframes fadeInImage {
+        from {
+            opacity: 0;
+            transform: scale(1.05);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .certificates-carousel {
+        position: relative;
+        padding-left: 80px;
+        padding-right: 80px;
+    }
+
+    .certificates-slide {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.6s ease-in-out;
+    }
+
+    .certificates-slide.active {
+        display: block;
+        opacity: 1;
+    }
+
+    .certificate-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        height: 400px;
+        cursor: pointer;
+    }
+    .certificate-card.hover-glow {
+        border: 3px solid #ff4500 !important;
+        box-shadow: 0 10px 44px 0 rgba(255, 107, 0, 0.33), 0 2px 8px #ffae40;
+        animation: none !important;
+        z-index: 3;
+        transform: scale(1.065);
+    }
+    .certificate-modal-bg {
+        position: fixed; left:0; top:0; right:0; bottom:0;
+        background: rgba(20,20,20,0.82);
+        z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeInModalBg .18s;
+    }
+    @keyframes fadeInModalBg { from{opacity:0;} to{opacity:1;} }
+    .certificate-modal-img {
+        max-width: 85vw;
+        max-height: 80vh;
+        box-shadow: 0 10px 44px 0 rgba(255, 107, 0, 0.32), 0 2px 18px #ffae00;
+        border-radius: 24px;
+        background: #fff;
+        padding: 18px;
+        animation: fadeInModalImg .18s cubic-bezier(.38,1.03,.51,.93);
+    }
+    @keyframes fadeInModalImg { from{transform:scale(.91); opacity:0;} to{transform:scale(1); opacity:1;} }
+    .certificate-modal-close {
+        position: absolute;
+        top: 3vh; right: 5vw;
+        background: #ff6b00;
+        color: #fff;
+        border: none;
+        font-size: 2.3rem;
+        padding: 0.1em 0.4em 0.2em;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px #ff6b0030;
+        cursor: pointer;
+        transition: background .18s;
+        z-index: 10000;
+    }
+    .certificate-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px rgba(255, 107, 0, 0.2);
+    }
+    .certificate-modal-close:hover { background: #d51b1b; }
+    @media (max-width: 900px) {
+        .certificate-modal-img { max-width: 98vw; max-height: 72vh;}
+        .certificate-modal-close { top: 2vh; right: 2vw;}
+    }
+    @media (max-width: 600px) {
+        .certificate-modal-bg { display: none !important;}
+    }
+    .certificate-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 24px;
+        background: linear-gradient(145deg, #fafafa, #f0f0f0);
+    }
+
+    .carousel-control {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #ff6b00 0%, #ff4500 100%);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(255, 107, 0, 0.3);
+        z-index: 10;
+    }
+
+    .carousel-control:hover {
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 10px 30px rgba(255, 107, 0, 0.5);
+        background: linear-gradient(135deg, #ff4500 0%, #d51b1b 100%);
+    }
+
+    .carousel-control-prev {
+        left: -28px;
+    }
+
+    .carousel-control-next {
+        right: -28px;
+    }
+
+    .carousel-indicators {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 2rem;
+    }
+
+    .carousel-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 107, 0, 0.3);
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .carousel-indicator.active {
+        background: #ff6b00;
+        transform: scale(1.2);
+    }
+
+    @keyframes certificate-glow {
+        0%, 100% {
+            box-shadow: 0 25px 50px rgba(255, 107, 0, 0.3);
+        }
+        50% {
+            box-shadow: 0 30px 60px rgba(255, 107, 0, 0.5);
+        }
+    }
+
+    .certificate-active-glow {
+        animation: certificate-glow 3s ease-in-out infinite;
+    }
+
+    .certificate-active-glow-subtle {
+        animation: certificate-glow 3s ease-in-out infinite;
+        animation-duration: 4s;
+    }
+
+    @media (max-width: 1024px) {
+        .certificate-card {
+            height: 350px;
+        }
+        
+        .certificate-image {
+            padding: 20px;
+        }
+        
+        .certificates-carousel {
+            padding-left: 28px;
+            padding-right: 28px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .certificate-card {
+            height: 320px;
+        }
+        
+        .certificate-image {
+            padding: 16px;
+        }
+        
+        .carousel-control {
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+
+    .certificates-carousel {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+    @media (max-width: 1024px) {
+        .certificates-carousel {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+    }
+    
+    .carousel-control {
+        width: 64px !important;
+        height: 64px !important;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 2rem;
+        opacity: 0.95;
+        border: 4px solid #fff;
+        background: linear-gradient(135deg, #ff6b00 0%, #ff4500 100%);
+        box-shadow: 0 6px 24px 4px rgba(255, 107, 0, 0.18), 0 2px 10px rgba(0,0,0,0.10);
+        transition: all .25s cubic-bezier(.8,.2,.2,1), opacity .25s;
+        z-index: 11;
+    }
+    .carousel-control:hover {
+        opacity: 1;
+        transform: translateY(-50%) scale(1.12) rotate(-3deg);
+        background: linear-gradient(135deg, #ff4500 0%, #d51b1b 100%);
+        box-shadow: 0 8px 32px 8px rgba(255, 107, 0, 0.25), 0 4px 18px rgba(0,0,0,0.13);
+    }
+    
+    .carousel-control-prev {
+        left: 0;
+    }
+    .carousel-control-next {
+        right: 0;
+    }
+    
+    .carousel-indicators {
+        margin-top: 2.7rem !important;
+        margin-bottom: 24px !important; 
+    }
+    .carousel-indicator {
+        width: 14px;
+        height: 14px;
+        background: linear-gradient(135deg, #ff6b00 60%, #ffae00 100%);
+        opacity: 0.65;
+        border: 2px solid #fff;
+        box-shadow: 0 1px 5px #ff6b0050;
+    }
+    .carousel-indicator.active {
+        opacity: 1;
+        box-shadow: 0 2px 14px #ff6b0090;
+        outline: 2px solid #ff6b0040;
+        transform: scale(1.18);
+    }
+    
+    .certificates-slide {
+        animation: fadeSlide 0.7s cubic-bezier(.23,1.01,.32,1);
+    }
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(40px) scale(.97);}
+        to { opacity: 1; transform: translateY(0) scale(1);}
+    }
+    
+    .certificate-card.center-glow {
+        border: 3px solid #ffae00;
+        box-shadow: 0 10px 40px 0 rgba(255, 107, 0, 0.26), 0 2px 8px #ffd580;
+        animation: certificate-glow 2.2s cubic-bezier(.5,.1,.1,1) infinite;
+        z-index: 2;
+        transform: scale(1.045);
+    }
+    .certificate-card:not(.center-glow) {
+        box-shadow: 0 6px 18px rgba(0,0,0,0.09);
+        opacity: 0.94;
+        z-index: 1;
+    }
+    
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800">
@@ -61,7 +382,6 @@
                     </svg>
                     <span>Каталог продукции</span>
                 </a>
-                
             </div>
         </div>
     </div>
@@ -142,7 +462,7 @@
                 <div class="relative rounded-2xl overflow-hidden shadow-2xl">
                     <img src="{% static 'images/fire-safety-production.png' %}" 
                          alt="Производство противопожарного оборудования" 
-                         class="w-full h-[500px] object-cover">
+                         class="w-full h-[500px] object-cover object-center md:object-center sm:object-left-center production-image">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                 </div>
             </div>
@@ -167,8 +487,7 @@
             {% if categories %}
                 {% for category in categories %}
                 <div class="group relative glass-fire rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 fire-card animate__animated animate__fadeInUp" 
-                style="animation-delay: {{ forloop.counter0|add:0.0|floatformat:'1'|default:'0.0' }}s;" > <!-- VS code or other editors may show error here, it's okay don't pay attention --> 
-                    
+                style="animation-delay: {{ forloop.counter0|add:0.0|floatformat:'1'|default:'0.0' }}s;">
                     <div class="relative overflow-hidden h-80">
                         {% if category.image %}
                             <img src="{{ category.image.url }}" 
@@ -179,7 +498,7 @@
                                 {% if category.icon %}
                                     <img src="{{ category.icon.url }}" alt="{{ category.name }}" class="w-20 h-20 text-orange-400"> 
                                 {% else %}
-                                    <svg class="w-20 h-20 text-orange-400" fill="currentColor" viewBox="0 0 20 20"> <!-- Увеличен размер SVG -->
+                                    <svg class="w-20 h-20 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                                     </svg>
                                 {% endif %}
@@ -266,122 +585,120 @@
 </section>
 
 <!-- Certificates Section -->
-<section class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16 animate__animated animate__fadeInUp">
+<section class="py-20 bg-gradient-to-br from-gray-50 to-white">
+    <div class="max-w-7xl xl:max-w-8xl 2xl:max-w-[1700px] mx-auto px-6">
+        <div class="text-center mb-16">
             <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-                Сертификаты и качество
+                Сертификаты и документы
             </h2>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                Вся наша продукция имеет необходимые сертификаты соответствия и прошла испытания на огнестойкость
+                Вся наша продукция имеет полный комплект сертификатов соответствия и технических документов
             </p>
         </div>
         
-        <!-- Certificates Slider -->
-        <div class="relative">
-            <div class="swiper certificates-swiper">
-                <div class="swiper-wrapper">
-                    {% if certificates %}
-                        {% for certificate in certificates %}
-                        <div class="swiper-slide">
-                            <div class="group cursor-pointer glass-fire rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105"
-                            onclick="openCertificateModal(this)"
-                            data-certificate-id="{{ certificate.id }}"
-                            data-certificate-name="{{ certificate.name|escapejs }}"
-                            data-certificate-description="{{ certificate.description|escapejs }}"
-                            data-certificate-image="{% if certificate.image %}{{ certificate.image.url }}{% endif %}"
-                            data-certificate-issued="{{ certificate.issued_date|date:'d.m.Y'|default_if_none:'' }}"
-                            data-certificate-expiry="{% if certificate.expiry_date %}{{ certificate.expiry_date|date:'d.m.Y' }}{% endif %}"
-                            data-certificate-expired="{% if certificate.is_expired %}true{% else %}false{% endif %}">
-                                <div class="relative overflow-hidden">
-                                    {% if certificate.image %}
-                                        <img src="{{ certificate.image.url }}" 
-                                             alt="{{ certificate.name }}" 
-                                             class="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500">
-                                    {% else %}
-                                        <div class="w-full h-64 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
-                                            <svg class="w-16 h-16 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    {% endif %}
-                                    
-                                    <!-- Status Badge -->
-                                    {% if not certificate.is_expired %}
-                                    <div class="absolute top-3 right-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                        Действует
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <!-- Hover Overlay -->
-                                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                        <div class="text-white text-center">
-                                            <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            <p class="text-sm font-semibold">Посмотреть</p>
-                                        </div>
+        <!-- Certificates Display -->
+        {% if certificates|length > 3 %}
+            <!-- Large screens carousel (3 certificates per slide) -->
+            <div id="certificatesCarouselLarge" class="certificates-carousel hidden lg:block relative">
+                {% for chunk in certificates|chunked:3 %}
+                    <div class="certificates-slide {% if forloop.first %}active{% endif %}">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                            {% for cert in chunk %}
+                                <div class="flex justify-center">
+                                    <div class="certificate-card w-full max-w-md certificate-active-glow-subtle
+                                        {% if forloop.counter0 == 1 %}center-glow{% endif %}">
+                                        <img src="{{ cert.image.url }}" 
+                                            alt="{{ cert.name }}" 
+                                            class="certificate-image">
                                     </div>
                                 </div>
-                                
-                                <div class="p-6">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-2 group-hover:text-orange-600 transition-colors">
-                                        {{ certificate.name }}
-                                    </h3>
-                                    {% if certificate.description %}
-                                    <p class="text-gray-600 text-sm line-clamp-2">
-                                        {{ certificate.description|truncatewords:15 }}
-                                    </p>
-                                    {% endif %}
-                                </div>
-                            </div>
+                            {% endfor %}
+
                         </div>
-                        {% endfor %}
-                    {% else %}
-                        <!-- Default certificate если нет в БД -->
-                        <div class="swiper-slide">
-                            <div class="glass-fire rounded-xl overflow-hidden">
-                                <div class="w-full h-64 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
-                                    <svg class="w-16 h-16 text-orange-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="p-6">
-                                    <h3 class="text-lg font-bold text-gray-900 mb-2">Сертификат соответствия</h3>
-                                    <p class="text-gray-600 text-sm">Документы подтверждающие качество нашей продукции</p>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <!-- Navigation controls -->
+                <button class="carousel-control carousel-control-prev" type="button" onclick="prevSlide('certificatesCarouselLarge')">
+                    <i class="fas fa-angle-left text-xl"></i>
+                </button>
+                <button class="carousel-control carousel-control-next" type="button" onclick="nextSlide('certificatesCarouselLarge')">
+                    <i class="fas fa-angle-right text-xl"></i>
+                </button>
+                
+                <!-- Indicators -->
+                <div class="carousel-indicators">
+                    {% for chunk in certificates|chunked:3 %}
+                        <button class="carousel-indicator {% if forloop.first %}active{% endif %}" 
+                                onclick="goToSlide('certificatesCarouselLarge', {{ forloop.counter0 }})"></button>
+                    {% endfor %}
                 </div>
             </div>
-            
-            <!-- Navigation -->
-            <div class="certificates-navigation flex justify-center items-center gap-4 mt-8">
-                <button class="certificates-prev" aria-label="Предыдущий сертификат">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
+
+            <!-- Mobile carousel (1 certificate per slide) -->
+            <div id="certificatesCarouselSmall" class="certificates-carousel block lg:hidden relative">
+                {% for cert in certificates %}
+                    <div class="certificates-slide {% if forloop.first %}active{% endif %}">
+                        <div class="flex justify-center">
+                            <div class="certificate-card w-full max-w-md certificate-active-glow">
+                                <img src="{{ cert.image.url }}" 
+                                     alt="{{ cert.name }}" 
+                                     class="certificate-image">
+                                
+
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                <!-- Navigation controls -->
+                <button class="carousel-control carousel-control-prev" type="button" onclick="prevSlide('certificatesCarouselSmall')">
+                    <i class="fas fa-angle-left text-xl"></i>
                 </button>
-                <div class="certificates-pagination"></div>
-                <button class="certificates-next" aria-label="Следующий сертификат">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
+                <button class="carousel-control carousel-control-next" type="button" onclick="nextSlide('certificatesCarouselSmall')">
+                    <i class="fas fa-angle-right text-xl"></i>
                 </button>
+                
+                <!-- Indicators -->
+                <div class="carousel-indicators">
+                    {% for cert in certificates %}
+                        <button class="carousel-indicator {% if forloop.first %}active{% endif %}" 
+                                onclick="goToSlide('certificatesCarouselSmall', {{ forloop.counter0 }})"></button>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
+        {% else %}
+            <!-- Static display for 3 or fewer certificates -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
+                {% for cert in certificates %}
+                    <div class="flex justify-center">
+                        <div class="certificate-card w-full max-w-md {% if certificates|length == 1 %}certificate-active-glow{% else %}certificate-active-glow-subtle{% endif %}">
+                            <img src="{{ cert.image.url }}" 
+                                 alt="{{ cert.name }}" 
+                                 class="certificate-image">
+                            
+                            <!-- Certificate Status (optional) -->
+                            {% if cert.is_active %}
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-green-500 text-white text-xs font-semibold rounded-full">
+                                Действует
+                            </div>
+                            {% elif cert.expiry_date and cert.expiry_date < today %}
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full">
+                                Истек
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-span-full text-center">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4">Сертификаты скоро появятся</h3>
+                        <p class="text-gray-600">Мы работаем над размещением всех наших сертификатов</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
         
-        <div class="text-center mt-12">
-            <a href="{% url 'core:certificates' %}" 
-               class="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                <span>Все сертификаты</span>
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
-            </a>
-        </div>
+        
     </div>
 </section>
 
@@ -389,25 +706,188 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    initCertificatesSwiper();
-    
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+    let currentSlideIndex = {
+        'certificatesCarouselLarge': 0,
+        'certificatesCarouselSmall': 0
     };
     
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
-            }
-        });
-    }, observerOptions);
+    let autoplayInterval = {};
     
-    document.querySelectorAll('.fire-card').forEach(card => {
-        observer.observe(card);
+    function showSlide(carouselId, index) {
+        const carousel = document.getElementById(carouselId);
+        if (!carousel) return;
+        
+        const slides = carousel.querySelectorAll('.certificates-slide');
+        const indicators = carousel.querySelectorAll('.carousel-indicator');
+        
+        slides.forEach(slide => {
+            slide.classList.remove('active');
+        });
+        
+        indicators.forEach(indicator => {
+            indicator.classList.remove('active');
+        });
+        
+        if (slides[index]) {
+            slides[index].classList.add('active');
+        }
+        
+        if (indicators[index]) {
+            indicators[index].classList.add('active');
+        }
+        
+        currentSlideIndex[carouselId] = index;
+        highlightCenterCertificate(carouselId);
+
+    }
+    function highlightCenterCertificate(carouselId) {
+        const carousel = document.getElementById(carouselId);
+        if (!carousel) return;
+        const activeSlide = carousel.querySelector('.certificates-slide.active');
+        if (!activeSlide) return;
+        activeSlide.querySelectorAll('.certificate-card').forEach(card => card.classList.remove('center-glow'));
+        const cards = activeSlide.querySelectorAll('.certificate-card');
+        if (cards.length === 3) cards[1].classList.add('center-glow');
+        if (cards.length === 1) cards[0].classList.add('center-glow');
+        if (cards.length === 2) cards.forEach(card => card.classList.add('center-glow'));
+    }
+    
+    function nextSlide(carouselId) {
+        const carousel = document.getElementById(carouselId);
+        if (!carousel) return;
+        
+        const slides = carousel.querySelectorAll('.certificates-slide');
+        const nextIndex = (currentSlideIndex[carouselId] + 1) % slides.length;
+        showSlide(carouselId, nextIndex);
+    }
+    
+    function prevSlide(carouselId) {
+        const carousel = document.getElementById(carouselId);
+        if (!carousel) return;
+        
+        const slides = carousel.querySelectorAll('.certificates-slide');
+        const prevIndex = (currentSlideIndex[carouselId] - 1 + slides.length) % slides.length;
+        showSlide(carouselId, prevIndex);
+    }
+    
+    function goToSlide(carouselId, index) {
+        showSlide(carouselId, index);
+    }
+    
+    function startAutoplay(carouselId) {
+        autoplayInterval[carouselId] = setInterval(() => {
+            nextSlide(carouselId);
+        }, 3500); 
+    }
+    
+    function stopAutoplay(carouselId) {
+        if (autoplayInterval[carouselId]) {
+            clearInterval(autoplayInterval[carouselId]);
+            autoplayInterval[carouselId] = null;
+        }
+    }
+    
+    function openCertificateModal(src, alt) {
+        if(document.querySelector('.certificate-modal-bg')) document.querySelector('.certificate-modal-bg').remove();
+    
+        const bg = document.createElement('div');
+        bg.className = 'certificate-modal-bg';
+        bg.innerHTML = `
+            <button class="certificate-modal-close" title="Закрыть" onclick="closeCertificateModal()">&times;</button>
+            <img src="${src}" alt="${alt}" class="certificate-modal-img" />
+        `;
+        bg.onclick = function(e) {
+            if(e.target === bg) closeCertificateModal();
+        }
+        document.body.appendChild(bg);
+    
+        document.addEventListener('keydown', escHandler);
+        function escHandler(e) {
+            if(e.key === "Escape") closeCertificateModal();
+        }
+        window.closeCertificateModal = function() {
+            bg.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const largeCarousel = document.getElementById('certificatesCarouselLarge');
+        const smallCarousel = document.getElementById('certificatesCarouselSmall');
+        function isDesktop() { return window.innerWidth > 600; }
+
+        if (largeCarousel) {
+            startAutoplay('certificatesCarouselLarge');
+            
+            largeCarousel.addEventListener('mouseenter', () => {
+                stopAutoplay('certificatesCarouselLarge');
+            });
+            
+            largeCarousel.addEventListener('mouseleave', () => {
+                startAutoplay('certificatesCarouselLarge');
+            });
+        }
+        
+        if (smallCarousel) {
+            startAutoplay('certificatesCarouselSmall');
+            
+            smallCarousel.addEventListener('mouseenter', () => {
+                stopAutoplay('certificatesCarouselSmall');
+            });
+            
+            smallCarousel.addEventListener('mouseleave', () => {
+                startAutoplay('certificatesCarouselSmall');
+            });
+        }
+        
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+    
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeInUp');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        document.querySelectorAll('.certificates-carousel').forEach(carousel => {
+            carousel.addEventListener('mouseover', function(e) {
+                if (!isDesktop()) return;
+                const card = e.target.closest('.certificate-card');
+                if (!card) return;
+                carousel.querySelectorAll('.certificate-card').forEach(el => el.classList.remove('hover-glow'));
+                card.classList.add('hover-glow');
+            });
+            carousel.addEventListener('mouseout', function(e) {
+                if (!isDesktop()) return;
+                carousel.querySelectorAll('.certificate-card').forEach(el => el.classList.remove('hover-glow'));
+                highlightCenterCertificate(carousel.id);
+            });
+        });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(element => {
+            observer.observe(element);
+        });
+
+        document.querySelectorAll('.certificates-carousel .certificate-card').forEach(card => {
+            card.addEventListener('click', function(e){
+                if (!isDesktop()) return;
+                const img = card.querySelector('img');
+                if (!img) return;
+                openCertificateModal(img.src, img.alt || "");
+            });
+        });
+
+        highlightCenterCertificate('certificatesCarouselLarge');
+        highlightCenterCertificate('certificatesCarouselSmall');
+
     });
-});
+    
+    window.nextSlide = nextSlide;
+    window.prevSlide = prevSlide;
+    window.goToSlide = goToSlide;
 </script>
 {% endblock %}
