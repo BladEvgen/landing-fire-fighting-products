@@ -1,23 +1,27 @@
 from django.db.models import Q
+from django.utils import timezone
+from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, render
-
 from .models import Certificate, CompanyInfo, Product, Category, Tag
 
 
 def get_company_context():
-    """Получение контекста компании для всех шаблонов"""
     company_info = CompanyInfo.objects.first()
-    return {
-        'company_info': company_info
-    }
+    return {"company_info": company_info}
 
 
 def index(request):
-    categories = Category.objects.filter(is_active=True).order_by('sort_order', 'name')[:6]
-    
-    certificates = Certificate.objects.filter(is_active=True).order_by('-issued_date')[:6]
-    
+    categories = Category.objects.filter(is_active=True).order_by("sort_order", "name")[
+        :6
+    ]
+
+    certificates = (
+        Certificate.objects.filter(is_active=True)
+        .filter(Q(expiry_date__isnull=True) | Q(expiry_date__gte=timezone.now().date()))
+        .order_by("-issued_date")[:6]
+    )
+
     achievements = [
         {"number": "25+", "text": "лет на рынке"},
         {"number": "1000+", "text": "выполненных проектов"},
@@ -38,79 +42,129 @@ def catalog(request):
     category_slug = request.GET.get("category")
     tag_slug = request.GET.get("tag")
     search_query = request.GET.get("search", "").strip()
-    sort_by = request.GET.get("sort", "name")  
-    
-    products = Product.objects.filter(is_active=True)
-    
+    sort_by = request.GET.get("sort", "name")
+    show_featured = request.GET.get("featured") == "1"
+    show_new = request.GET.get("new") == "1"
+
+    products = Product.objects.filter(is_active=True).prefetch_related(
+        "categories", "tags", "images"
+    )
+
+    selected_category = None
     if category_slug:
-        products = products.filter(categories__slug=category_slug)
-    
+        try:
+            selected_category = Category.objects.get(slug=category_slug, is_active=True)
+            products = products.filter(categories=selected_category)
+        except Category.DoesNotExist:
+            pass
+
+    selected_tag = None
     if tag_slug:
-        products = products.filter(tags__slug=tag_slug)
-    
+        try:
+            selected_tag = Tag.objects.get(slug=tag_slug, is_active=True)
+            products = products.filter(tags=selected_tag)
+        except Tag.DoesNotExist:
+            pass
+
     if search_query:
         products = products.filter(
-            Q(name__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(short_description__icontains=search_query)
+            Q(name__icontains=search_query)
+            | Q(description__icontains=search_query)
+            | Q(short_description__icontains=search_query)
+            | Q(specifications__icontains=search_query)
         )
-    
-    if sort_by == "price":
-        products = products.filter(price__isnull=False).order_by("price")
-    elif sort_by == "-price":
-        products = products.filter(price__isnull=False).order_by("-price")
-    elif sort_by == "-created_at":
-        products = products.order_by("-created_at")
+
+        products = products.filter(is_featured=True)
+
+    if show_new:
+        products = products.filter(is_new=True)
+
+    if sort_by == "name":
+        products = products.order_by("sort_order", "name")
+    elif sort_by == "name_desc":
+        products = products.order_by("-name")
+    elif sort_by == "featured":
+        products = products.order_by("-is_featured", "sort_order", "name")
+    elif sort_by == "new":
+        products = products.order_by("-is_new", "sort_order", "name")
     else:
-        products = products.order_by("name")
-    
-    products = products.distinct()
-    
-    paginator = Paginator(products, 12)  
-    page_number = request.GET.get('page')
+        products = products.order_by("sort_order", "name")
+
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    
-    categories = Category.objects.filter(is_active=True).order_by('name')
-    tags = Tag.objects.filter(is_active=True).order_by('name')
-    
+
+    categories = Category.objects.filter(is_active=True).order_by("sort_order", "name")
+    tags = Tag.objects.filter(is_active=True).order_by("name")
+
+    total_products = Product.objects.filter(is_active=True).count()
+    featured_count = Product.objects.filter(is_active=True, is_featured=True).count()
+    new_count = Product.objects.filter(is_active=True, is_new=True).count()
+
     context = {
         **get_company_context(),
-        "page_obj": page_obj,
-        "products": page_obj,  
+        "products": page_obj,
         "categories": categories,
         "tags": tags,
-        "current_category": category_slug,
-        "current_tag": tag_slug,
+        "selected_category": selected_category,
+        "selected_tag": selected_tag,
         "search_query": search_query,
         "sort_by": sort_by,
-        "total_count": paginator.count,
+        "show_featured": show_featured,
+        "show_new": show_new,
+        "total_products": total_products,
+        "featured_count": featured_count,
+        "new_count": new_count,
+        "products_count": paginator.count,
     }
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse(
+            {
+                "html": render(
+                    request, "catalog_products.html", context
+                ).content.decode("utf-8"),
+                "products_count": paginator.count,
+                "page_info": {
+                    "has_previous": page_obj.has_previous(),
+                    "has_next": page_obj.has_next(),
+                    "number": page_obj.number,
+                    "num_pages": paginator.num_pages,
+                },
+            }
+        )
+
     return render(request, "catalog.html", context)
 
 
 def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug, is_active=True)
-    
-    related_products = Product.objects.filter(
-        categories__in=product.categories.all(),
-        is_active=True
-    ).exclude(id=product.id).distinct()[:4]
-    
+
+    related_products = (
+        Product.objects.filter(categories__in=product.categories.all(), is_active=True)
+        .exclude(id=product.id)
+        .distinct()[:6]
+    )
+
     context = {
         **get_company_context(),
         "product": product,
         "related_products": related_products,
     }
+
     return render(request, "product_detail.html", context)
 
 
 def certificates(request):
-    certificates = Certificate.objects.filter(is_active=True).order_by('-issued_date')
-    
-    paginator = Paginator(certificates, 9) 
-    page_number = request.GET.get('page')
+    certificates = (
+        Certificate.objects.filter(is_active=True)
+        .filter(Q(expiry_date__isnull=True) | Q(expiry_date__gte=timezone.now().date()))
+        .order_by("-issued_date")[:6]
+    )
+    paginator = Paginator(certificates, 9)
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         **get_company_context(),
         "certificates": page_obj,
@@ -121,14 +175,14 @@ def certificates(request):
 
 def about(request):
     company = CompanyInfo.objects.first()
-    
+
     achievements = [
         {"number": "25+", "text": "лет на рынке"},
         {"number": "1000+", "text": "выполненных проектов"},
         {"number": "500+", "text": "довольных клиентов"},
         {"number": "100%", "text": "контроль качества"},
     ]
-    
+
     context = {
         **get_company_context(),
         "company": company,
@@ -139,18 +193,16 @@ def about(request):
 
 def contacts(request):
     company = CompanyInfo.objects.first()
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         try:
             from .models import ContactForm
-            
-            # Получаем данные из формы
-            name = request.POST.get('name', '').strip()
-            phone = request.POST.get('phone', '').strip()
-            email = request.POST.get('email', '').strip()
-            message = request.POST.get('message', '').strip()
-            
-            # Базовая валидация
+
+            name = request.POST.get("name", "").strip()
+            phone = request.POST.get("phone", "").strip()
+            email = request.POST.get("email", "").strip()
+            message = request.POST.get("message", "").strip()
+
             if name and phone:
                 contact_form = ContactForm.objects.create(
                     name=name,
@@ -158,34 +210,46 @@ def contacts(request):
                     email=email,
                     message=message,
                     ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
-                    referer=request.META.get('HTTP_REFERER', ''),
+                    user_agent=request.META.get("HTTP_USER_AGENT", ""),
+                    referer=request.META.get("HTTP_REFERER", ""),
                 )
-                
+
                 # send_notification_email(contact_form)
-                
-                return render(request, "contacts.html", {
-                    **get_company_context(),
-                    "company": company,
-                    "success": True,
-                    "message": "Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время."
-                })
+
+                return render(
+                    request,
+                    "contacts.html",
+                    {
+                        **get_company_context(),
+                        "company": company,
+                        "success": True,
+                        "message": "Спасибо! Ваша заявка отправлена. Мы свяжемся с вами в ближайшее время.",
+                    },
+                )
             else:
-                return render(request, "contacts.html", {
+                return render(
+                    request,
+                    "contacts.html",
+                    {
+                        **get_company_context(),
+                        "company": company,
+                        "error": True,
+                        "message": "Пожалуйста, заполните обязательные поля: имя и телефон.",
+                    },
+                )
+
+        except Exception:
+            return render(
+                request,
+                "contacts.html",
+                {
                     **get_company_context(),
                     "company": company,
                     "error": True,
-                    "message": "Пожалуйста, заполните обязательные поля: имя и телефон."
-                })
-                
-        except Exception as e:
-            return render(request, "contacts.html", {
-                **get_company_context(),
-                "company": company,
-                "error": True,
-                "message": "Произошла ошибка при отправке заявки. Попробуйте позже."
-            })
-    
+                    "message": "Произошла ошибка при отправке заявки. Попробуйте позже.",
+                },
+            )
+
     context = {
         **get_company_context(),
         "company": company,
@@ -195,15 +259,14 @@ def contacts(request):
 
 def category_detail(request, slug):
     category = get_object_or_404(Category, slug=slug, is_active=True)
-    products = Product.objects.filter(
-        categories=category, 
-        is_active=True
-    ).order_by('sort_order', 'name')
+    products = Product.objects.filter(categories=category, is_active=True).order_by(
+        "sort_order", "name"
+    )
 
     paginator = Paginator(products, 12)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         **get_company_context(),
         "category": category,
@@ -214,32 +277,28 @@ def category_detail(request, slug):
 
 
 def search_results(request):
-    query = request.GET.get('q', '').strip()
+    query = request.GET.get("q", "").strip()
     results = []
-    
+
     if query:
-        # Поиск по продуктам
         products = Product.objects.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query) |
-            Q(short_description__icontains=query),
-            is_active=True
+            Q(name__icontains=query)
+            | Q(description__icontains=query)
+            | Q(short_description__icontains=query),
+            is_active=True,
         )
-        
-        # Поиск по категориям
+
         categories = Category.objects.filter(
-            Q(name__icontains=query) |
-            Q(description__icontains=query),
-            is_active=True
+            Q(name__icontains=query) | Q(description__icontains=query), is_active=True
         )
-        
+
         results = {
-            'products': products[:20],  
-            'categories': categories[:10],
-            'total_products': products.count(),
-            'total_categories': categories.count(),
+            "products": products[:20],
+            "categories": categories[:10],
+            "total_products": products.count(),
+            "total_categories": categories.count(),
         }
-    
+
     context = {
         **get_company_context(),
         "query": query,
@@ -249,10 +308,9 @@ def search_results(request):
 
 
 def get_client_ip(request):
-    """Получение IP адреса клиента"""
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(",")[0]
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get("REMOTE_ADDR")
     return ip
