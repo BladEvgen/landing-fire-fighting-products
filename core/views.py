@@ -1,9 +1,16 @@
-from django.db.models import Q
+import csv
+import json
 from django.utils import timezone
-from django.http import JsonResponse
+from django.contrib import messages
+from django.db.models import Q, Count
+from datetime import datetime, timedelta
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404, render
-from .models import Certificate, CompanyInfo, Product, Category, Tag
+from django.http import JsonResponse, HttpResponse
+from django.template.response import TemplateResponse
+from django.views.decorators.http import require_http_methods
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib.admin.views.decorators import staff_member_required
+from .models import Certificate, CompanyInfo, Product, Category, Tag, ContactForm
 
 
 def get_company_context():
@@ -74,6 +81,7 @@ def catalog(request):
             | Q(specifications__icontains=search_query)
         )
 
+    if show_featured:
         products = products.filter(is_featured=True)
 
     if show_new:
@@ -314,3 +322,172 @@ def get_client_ip(request):
     else:
         ip = request.META.get("REMOTE_ADDR")
     return ip
+
+
+@staff_member_required
+def statistics_view(request):
+    """Представление статистики для админки"""
+    
+    # Основная статистика
+    stats = {
+        'total_products': Product.objects.count(),
+        'active_products': Product.objects.filter(is_active=True).count(),
+        'featured_products': Product.objects.filter(is_featured=True).count(),
+        'new_products': Product.objects.filter(is_new=True).count(),
+        'out_of_stock': Product.objects.filter(in_stock=False).count(),
+        'total_categories': Category.objects.count(),
+        'active_categories': Category.objects.filter(is_active=True).count(),
+        'total_certificates': Certificate.objects.count(),
+        'active_certificates': Certificate.objects.filter(is_active=True).count(),
+        'expired_certificates': Certificate.objects.filter(
+            expiry_date__lt=datetime.now().date()
+        ).count(),
+        'total_contacts': ContactForm.objects.count(),
+        'new_contacts': ContactForm.objects.filter(status='new').count(),
+        'contacts_today': ContactForm.objects.filter(
+            created_at__date=datetime.now().date()
+        ).count(),
+        'contacts_week': ContactForm.objects.filter(
+            created_at__gte=datetime.now() - timedelta(days=7)
+        ).count(),
+    }
+    
+    # Статистика по дням за последнюю неделю
+    week_data = []
+    for i in range(7):
+        date = datetime.now().date() - timedelta(days=i)
+        count = ContactForm.objects.filter(created_at__date=date).count()
+        week_data.append({
+            'date': date.strftime('%d.%m'),
+            'count': count
+        })
+    
+    # Статистика по статусам заявок
+    status_stats = {}
+    for status_code, status_name in ContactForm.STATUS_CHOICES:
+        status_stats[status_name] = ContactForm.objects.filter(
+            status=status_code
+        ).count()
+    
+    # Топ категории по количеству товаров
+    top_categories = Category.objects.annotate(
+        product_count=Count('product')
+    ).order_by('-product_count')[:5]
+    
+    context = {
+        'title': 'Статистика сайта',
+        'statistics': stats,
+        'week_data': reversed(week_data),
+        'status_statistics': status_stats,
+        'top_categories': top_categories,
+    }
+    
+    return TemplateResponse(request, 'admin/statistics.html', context)
+
+@staff_member_required 
+@require_http_methods(["GET", "POST"])
+def backup_view(request):
+    """Представление для создания резервных копий"""
+    
+    if request.method == 'POST':
+        include_images = request.POST.get('include_images')
+        include_contacts = request.POST.get('include_contacts') 
+        include_users = request.POST.get('include_users')
+        
+        try:
+            # Здесь можно добавить логику создания бэкапа
+            # Например, использовать django-dbbackup или создать свой механизм
+            
+            backup_data = {
+                'timestamp': datetime.now().isoformat(),
+                'include_images': bool(include_images),
+                'include_contacts': bool(include_contacts),
+                'include_users': bool(include_users),
+                'products_count': Product.objects.count(),
+                'categories_count': Category.objects.count(),
+                'contacts_count': ContactForm.objects.count() if include_contacts else 0,
+            }
+            
+            # Создаем JSON-файл с метаданными бэкапа
+            response = HttpResponse(
+                json.dumps(backup_data, indent=2, ensure_ascii=False),
+                content_type='application/json; charset=utf-8'
+            )
+            response['Content-Disposition'] = f'attachment; filename="backup_metadata_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json"'
+            
+            messages.success(request, 'Резервная копия создана успешно!')
+            return response
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при создании резервной копии: {str(e)}')
+            return redirect(request.path)
+    
+    return TemplateResponse(request, 'admin/backup.html', {
+        'title': 'Создание резервной копии'
+    })
+
+@staff_member_required
+def export_products(request):
+    """Экспорт товаров в CSV"""
+    
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="products_export_{datetime.now().strftime("%Y%m%d")}.csv"'
+    
+    # Добавляем BOM для корректного отображения в Excel
+    response.write('\ufeff')
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        'ID', 'Название', 'Slug', 'Краткое описание', 'Категории', 
+        'Теги', 'Активен', 'Рекомендуемый', 'Новинка', 'В наличии',
+        'Дата создания', 'Дата обновления'
+    ])
+    
+    for product in Product.objects.all().prefetch_related('categories', 'tags'):
+        writer.writerow([
+            product.id,
+            product.name,
+            product.slug,
+            product.short_description,
+            ', '.join([cat.name for cat in product.categories.all()]),
+            ', '.join([tag.name for tag in product.tags.all()]),
+            'Да' if product.is_active else 'Нет',
+            'Да' if product.is_featured else 'Нет', 
+            'Да' if product.is_new else 'Нет',
+            'Да' if product.in_stock else 'Нет',
+            product.created_at.strftime('%d.%m.%Y %H:%M'),
+            product.updated_at.strftime('%d.%m.%Y %H:%M'),
+        ])
+    
+    return response
+
+@staff_member_required
+def export_contacts(request):
+    """Экспорт заявок в CSV"""
+    
+    response = HttpResponse(content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = f'attachment; filename="contacts_export_{datetime.now().strftime("%Y%m%d")}.csv"'
+    
+    # Добавляем BOM для корректного отображения в Excel
+    response.write('\ufeff')
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        'ID', 'Имя', 'Телефон', 'Email', 'Сообщение', 'Статус',
+        'IP адрес', 'Согласие на обработку данных', 'Дата создания'
+    ])
+    
+    for contact in ContactForm.objects.all():
+        writer.writerow([
+            contact.id,
+            contact.name,
+            contact.phone,
+            contact.email,
+            contact.message,
+            contact.get_status_display(),
+            contact.ip_address,
+            'Да' if contact.personal_data_consent else 'Нет',
+            contact.created_at.strftime('%d.%m.%Y %H:%M'),
+        ])
+    
+    return response
