@@ -1,5 +1,5 @@
 {% extends "base/base.html" %}
-{% load static %}
+{% load static phone_filters %}
 
 {% block title %}Контакты | {{ company_info.name|default:"Вымпел-45" }}{% endblock %}
 
@@ -75,6 +75,211 @@
         box-shadow: 0 0 0 4px rgba(112, 128, 144, 0.1);
         background: white;
     }
+
+    .address-card {
+        background: linear-gradient(135deg, #ff6b00 0%, #dc2626 100%);
+        transition: all 0.4s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .address-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .address-card:hover::before {
+        left: 100%;
+    }
+
+    .address-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(255, 107, 0, 0.3);
+    }
+
+    .address-icon {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+
+    /* Новые стили для улучшенной карты */
+    .enhanced-map-container {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        background: linear-gradient(135deg, #ff6b00 0%, #dc2626 100%);
+        padding: 4px;
+        box-shadow: 0 25px 50px rgba(255, 107, 0, 0.2);
+        z-index: 10;
+    }
+
+    .map-wrapper {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .map-controls {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .map-control-btn {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 107, 0, 0.2);
+        border-radius: 12px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .map-control-btn:hover {
+        background: rgba(255, 107, 0, 0.95);
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(255, 107, 0, 0.3);
+    }
+
+    .map-control-btn.active {
+        background: #ff6b00;
+        color: white;
+    }
+
+    .map-info-panel {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 107, 0, 0.2);
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        transform: translateY(100%);
+        transition: transform 0.4s ease;
+    }
+
+    .map-info-panel.show {
+        transform: translateY(0);
+    }
+
+    .coordinate-display {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 12px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .coordinate-display.show {
+        opacity: 1;
+    }
+
+    .map-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 999;
+        color: #ff6b00;
+        text-align: center;
+    }
+
+    .pulse-marker {
+        animation: pulse-ring 1.5s ease-out infinite;
+    }
+
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(0.33);
+            opacity: 1;
+        }
+        80%, 100% {
+            transform: scale(2.4);
+            opacity: 0;
+        }
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+        .enhanced-map-container {
+            margin: 0 -1rem;
+            border-radius: 16px;
+            z-index: 5;
+        }
+        
+        .map-controls {
+            top: 10px;
+            right: 10px;
+            gap: 6px;
+        }
+        
+        .map-control-btn {
+            min-width: 40px;
+            min-height: 40px;
+            padding: 10px;
+        }
+        
+        .map-info-panel {
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            padding: 16px;
+        }
+    }
+
+    /* Увеличиваем высоту на больших экранах */
+    @media (min-width: 1024px) {
+        #leaflet-map {
+            height: 600px !important;
+            min-height: 600px !important;
+        }
+    }
+
+    /* Скрываем атрибуцию Leaflet */
+    .leaflet-control-attribution {
+        display: none !important;
+    }
+
+    /* Убираем белую полосу */
+    .leaflet-container {
+        background: transparent !important;
+    }
 </style>
 {% endblock %}
 
@@ -94,7 +299,7 @@
         <!-- Quick Contact Buttons -->
         <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
             {% if company_info.phone %}
-            <a href="tel:{{ company_info.phone }}" 
+            <a href="tel:{{ company_info.phone|format_phone }}" 
                class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white text-red-700 font-bold rounded-xl hover:bg-orange-50 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105">
                 <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
@@ -146,7 +351,7 @@
                             <div>
                                 <h3 class="text-lg font-bold text-red-700 mb-1">Телефон</h3>
                                 <a href="tel:{{ company_info.phone }}" class="text-gray-700 hover:text-orange-600 transition-colors text-lg font-semibold">
-                                    {{ company_info.phone }}
+                                    {{ company_info.phone |format_phone}}
                                 </a>
                                 <p class="text-sm text-gray-500 mt-1">Звонки принимаем в рабочее время</p>
                             </div>
@@ -207,39 +412,6 @@
                         </div>
                     </div>
                     {% endif %}
-                </div>
-                
-                <!-- Social Links -->
-                <div class="pt-6">
-                    <h3 class="text-lg font-bold text-red-700 mb-4">Мы в соцсетях</h3>
-                    <div class="flex gap-3">
-                        {% if company_info.vk_url %}
-                        <a href="{{ company_info.vk_url }}" target="_blank" 
-                           class="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-300 hover:scale-110 shadow-lg">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12.785 16.241s.288-.032.436-.193c.136-.148.131-.426.131-.426s-.019-1.302.58-1.493c.591-.189 1.35 1.258 2.157 1.815.614.425 1.081.332 1.081.332l2.174-.03s1.137-.071.597-.973c-.044-.074-.315-.664-1.624-1.878-1.372-1.27-1.188-1.064.464-3.258.988-1.314 1.374-2.117 1.253-2.462-.116-.33-.832-.243-.832-.243l-2.447.015s-.181-.025-.315.056c-.131.078-.215.26-.215.26s-.383 1.02-.894 1.89c-1.077 1.832-1.508 1.929-1.686 1.815-.415-.265-.311-1.064-.311-1.632 0-1.776.268-2.517-.522-2.707-.262-.063-.455-.105-1.125-.112-0.861-.009-1.589.003-2.001.205-.274.134-.486.432-.357.449.16.021.522.098.713.36.247.338.238 1.097.238 1.097s.142 2.093-.331 2.352c-.325.178-.77-.185-1.725-1.846-.489-.844-.858-1.777-.858-1.777s-.071-.174-.198-.267c-.154-.113-.37-.149-.37-.149l-2.324.015s-.349.01-.476.161c-.113.135-.009.413-.009.413s1.805 4.23 3.847 6.361c1.875 1.956 4.007 1.827 4.007 1.827z"/>
-                            </svg>
-                        </a>
-                        {% endif %}
-                        
-                        {% if company_info.telegram_url %}
-                        <a href="{{ company_info.telegram_url }}" target="_blank" 
-                           class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300 hover:scale-110 shadow-lg">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                            </svg>
-                        </a>
-                        {% endif %}
-                        
-                        {% if company_info.whatsapp_phone %}
-                        <a href="https://wa.me/{{ company_info.whatsapp_phone|cut:'+' }}" target="_blank" 
-                           class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white hover:from-green-600 hover:to-green-700 transition-all duration-300 hover:scale-110 shadow-lg">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.088"/>
-                            </svg>
-                        </a>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
             
@@ -353,7 +525,7 @@
     </div>
 </section>
 
-<!-- Map Section -->
+<!-- Map or Address Section -->
 {% if company_info.address %}
 <section class="py-16 bg-gradient-to-br from-orange-50 to-slate-50">
     <div class="max-w-7xl mx-auto px-6">
@@ -362,26 +534,123 @@
                 Как нас найти
             </h2>
             <p class="text-gray-600 max-w-2xl mx-auto">
-                Наше производство и офис продаж находятся в Кирове. Приезжайте к нам для личной консультации!
+                Наше производство и офис продаж находятся в удобном месте. Приезжайте к нам для личной консультации!
             </p>
         </div>
-        
-        <div class="contact-card rounded-3xl shadow-lg overflow-hidden">
-            <!-- Placeholder для карты -->
-            <div class="h-96 bg-gradient-to-br from-slate-200 to-orange-100 flex items-center justify-center relative">
-                <div class="text-center z-10">
-                    <div class="w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
+
+        {% if company_info.latitude and company_info.longtitude %}
+        <!-- Enhanced Interactive Map -->
+        <div class="enhanced-map-container">
+            <div class="map-wrapper">
+                <!-- Loading indicator -->
+                <div id="map-loading" class="map-loading">
+                    <div class="w-12 h-12 border-4 border-orange-200 border-t-orange-600 rounded-full animate-spin mx-auto mb-2"></div>
+                    <p class="text-sm font-medium">Загрузка карты...</p>
+                </div>
+
+                <!-- Coordinate display -->
+                <div id="coordinate-display" class="coordinate-display">
+                    <div id="coords-text"></div>
+                </div>
+
+                <!-- Custom controls -->
+                <div class="map-controls">
+                    <div class="map-control-btn" id="locate-btn" title="Моё местоположение">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
                         </svg>
                     </div>
-                    <p class="text-red-700 font-bold text-lg">Интерактивная карта</p>
-                    <p class="text-gray-600">{{ company_info.address }}</p>
-                    <p class="text-sm text-gray-500 mt-2">Производство и офис продаж</p>
+                    
+                    <div class="map-control-btn" id="info-btn" title="Информация">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+
+                    <div class="map-control-btn" id="route-btn" title="Построить маршрут">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
                 </div>
-                <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+
+                <!-- Map container -->
+                <div id="leaflet-map"
+                     class="w-full opacity-0 transition-opacity duration-700"
+                     style="height: 500px; min-height: 500px;">
+                </div>
+
+                <!-- Info panel -->
+                <div id="map-info-panel" class="map-info-panel">
+                    <div class="flex items-start gap-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-red-700 mb-2">{{ company_info.name|default:"Наша компания" }}</h3>
+                            <p class="text-gray-700 mb-2">{{ company_info.address }}</p>
+                            <p class="text-sm text-gray-500 mb-3">📍 Производство и офис продаж</p>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="openYandexMapsCoords(currentLat, currentLng)" 
+                                        class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium hover:bg-yellow-200 transition-colors">
+                                    🗺️ Яндекс.Карты
+                                </button>
+                                <button onclick="openGoogleMaps(currentLat, currentLng)" 
+                                        class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors">
+                                    🌍 Google Maps
+                                </button>
+                                {% if company_info.phone %}
+                                <a href="tel:{{ company_info.phone }}" 
+                                   class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-lg text-sm font-medium hover:bg-green-200 transition-colors">
+                                    📞 Позвонить
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button id="close-info" class="text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+        {% else %}
+        <!-- Address Card with Yandex Maps Link -->
+        <div class="contact-card rounded-3xl shadow-lg overflow-hidden">
+            <div class="address-card p-12 rounded-3xl text-center text-white relative overflow-hidden"
+                 onclick="openYandexMaps('{{ company_info.address|escapejs }}')">
+                <div class="relative z-10">
+                    <div class="address-icon w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-black mb-4">Наш адрес</h3>
+                    <p class="text-xl font-semibold mb-2 text-orange-100">{{ company_info.address }}</p>
+                    <p class="text-orange-200 mb-6">Производство и офис продаж</p>
+                    
+                    <div class="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30 hover:bg-white/30 transition-all duration-300">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-bold">Открыть в Яндекс Картах</span>
+                    </div>
+                    
+                    <p class="text-sm text-orange-200 mt-4 opacity-80">Нажмите для построения маршрута</p>
+                </div>
+                
+                <!-- Decorative elements -->
+                <div class="absolute top-6 right-6 w-16 h-16 bg-white/10 rounded-full animate-pulse"></div>
+                <div class="absolute bottom-6 left-6 w-12 h-12 bg-white/10 rounded-full animate-pulse delay-300"></div>
+                <div class="absolute top-1/2 right-12 w-8 h-8 bg-white/10 rounded-full animate-pulse delay-700"></div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
 {% endif %}
@@ -451,7 +720,7 @@
                     </svg>
                 </button>
                 <div x-show="openFaq === 4" x-transition class="px-6 pb-4" style="display: none;">
-                    <p class="text-gray-600">На всю нашу продукцию предоставляется гарантия 25 лет. Гарантия распространяется на качество изготовления и соответствие техническим характеристикам.</p>
+                    <p class="text-gray-600">На всю нашу продукцию предоставляется гарантия. Гарантия распространяется на качество изготовления и соответствие техническим характеристикам.</p>
                 </div>
             </div>
         </div>
@@ -460,7 +729,228 @@
 {% endblock %}
 
 {% block extra_js %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
+    let map, marker, currentLat, currentLng;
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        var latStr = "{{ company_info.latitude|default:'' }}";
+        var lngStr = "{{ company_info.longtitude|default:'' }}";
+        var address = "{{ company_info.address|default:'Адрес не указан'|escapejs }}";
+        var companyName = "{{ company_info.name|default:'Компания'|escapejs }}";
+        
+        var lat = parseFloat(latStr.replace(',', '.'));
+        var lng = parseFloat(lngStr.replace(',', '.'));
+        
+        currentLat = lat;
+        currentLng = lng;
+        
+        console.log('Координаты:', lat, lng);
+        
+        if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+            initializeMap(lat, lng, address, companyName);
+        } else {
+            console.error('Invalid coordinates provided for map. Lat:', latStr, 'Lng:', lngStr);
+            document.getElementById('leaflet-map').style.display = 'none';
+            document.getElementById('map-loading').innerHTML = '<p class="text-red-600">Ошибка загрузки координат</p>';
+        }
+    });
+    
+    function initializeMap(lat, lng, address, companyName) {
+        map = L.map('leaflet-map', {
+            center: [lat, lng],
+            zoom: 17,
+            zoomControl: false,
+            attributionControl: false
+        });
+        
+        L.control.zoom({
+            position: 'bottomright'
+        }).addTo(map);
+        
+        L.control.scale({
+            position: 'bottomleft',
+            metric: true,
+            imperial: false
+        }).addTo(map);
+        
+        var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        });
+        
+        osmLayer.addTo(map);
+        
+        var customIcon = L.divIcon({
+            className: 'custom-marker',
+            html: `
+                <div style="position: relative;">
+                    <div class="pulse-marker" style="
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        width: 30px;
+                        height: 30px;
+                        background: rgba(255, 107, 0, 0.3);
+                        border-radius: 50%;
+                        transform: translate(-50%, -50%);
+                    "></div>
+                    <svg width="40" height="40" viewBox="0 0 24 24" style="position: relative; z-index: 2;">
+                        <path fill="#ff6b00" stroke="#fff" stroke-width="2" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                        <circle fill="#fff" cx="12" cy="9" r="3"/>
+                    </svg>
+                </div>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40]
+        });
+        
+        marker = L.marker([lat, lng], {icon: customIcon}).addTo(map);
+        
+        var popupContent = `
+            <div style="min-width: 250px; text-align: center;">
+                <h3 style="color: #dc2626; font-weight: bold; margin: 0 0 8px 0; font-size: 18px;">
+                    ${companyName}
+                </h3>
+                <p style="margin: 8px 0; color: #374151; font-size: 14px;">
+                    ${address}
+                </p>
+                <p style="color: #6b7280; font-size: 12px; margin: 8px 0 12px 0;">
+                    📍 Производство и офис продаж
+                </p>
+                <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="openYandexMapsCoords(${lat}, ${lng})" 
+                            style="background: #ffeb3b; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">
+                        Яндекс.Карты
+                    </button>
+                    <button onclick="openGoogleMaps(${lat}, ${lng})" 
+                            style="background: #4285f4; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer;">
+                        Google Maps
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        
+        map.on('mousemove', function(e) {
+            updateCoordinateDisplay(e.latlng.lat, e.latlng.lng);
+        });
+        
+        map.on('mouseout', function() {
+            hideCoordinateDisplay();
+        });
+        
+        map.on('click', function(e) {
+            showCoordinateDisplay();
+            updateCoordinateDisplay(e.latlng.lat, e.latlng.lng);
+        });
+        
+        setupMapControls(lat, lng, address);
+        
+        setTimeout(function() {
+            document.getElementById('map-loading').style.display = 'none';
+            var mapElement = document.getElementById('leaflet-map');
+            mapElement.classList.remove('opacity-0');
+            mapElement.classList.add('opacity-100');
+            
+            setTimeout(() => marker.openPopup(), 500);
+        }, 1000);
+        
+        map.scrollWheelZoom.disable();
+        map.on('click', function() {
+            map.scrollWheelZoom.enable();
+            setTimeout(() => map.scrollWheelZoom.disable(), 3000);
+        });
+    }
+    
+    function setupMapControls(lat, lng, address) {
+        document.getElementById('locate-btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                this.classList.add('active');
+                navigator.geolocation.getCurrentPosition((position) => {
+                    var userLat = position.coords.latitude;
+                    var userLng = position.coords.longitude;
+                    
+                    var userIcon = L.divIcon({
+                        className: 'user-marker',
+                        html: `<div style="width: 16px; height: 16px; background: #4285f4; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+                    
+                    L.marker([userLat, userLng], {icon: userIcon})
+                        .addTo(map)
+                        .bindPopup('📍 Ваше местоположение');
+                    
+                    var group = new L.featureGroup([marker, L.marker([userLat, userLng])]);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                    
+                    this.classList.remove('active');
+                }, () => {
+                    alert('Не удалось определить ваше местоположение');
+                    this.classList.remove('active');
+                });
+            }
+        });
+        
+        document.getElementById('info-btn').addEventListener('click', function() {
+            var panel = document.getElementById('map-info-panel');
+            panel.classList.toggle('show');
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('close-info').addEventListener('click', function() {
+            document.getElementById('map-info-panel').classList.remove('show');
+            document.getElementById('info-btn').classList.remove('active');
+        });
+        
+        document.getElementById('route-btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    var userLat = position.coords.latitude;
+                    var userLng = position.coords.longitude;
+                    var url = `https://yandex.ru/maps/?rtext=${userLat},${userLng}~${lat},${lng}&rtt=auto`;
+                    window.open(url, '_blank');
+                }, () => {
+                    openYandexMapsCoords(lat, lng);
+                });
+            } else {
+                openYandexMapsCoords(lat, lng);
+            }
+        });
+    }
+    
+    function updateCoordinateDisplay(lat, lng) {
+        document.getElementById('coords-text').textContent = 
+            `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+    
+    function showCoordinateDisplay() {
+        document.getElementById('coordinate-display').classList.add('show');
+    }
+    
+    function hideCoordinateDisplay() {
+        document.getElementById('coordinate-display').classList.remove('show');
+    }
+    
+    function openYandexMaps(address) {
+        var yandexUrl = 'https://yandex.ru/maps/?text=' + encodeURIComponent(address);
+        window.open(yandexUrl, '_blank');
+    }
+    
+    function openYandexMapsCoords(lat, lng) {
+        var yandexUrl = `https://yandex.ru/maps/?ll=${lng},${lat}&z=17&pt=${lng},${lat}`;
+        window.open(yandexUrl, '_blank');
+    }
+    
+    function openGoogleMaps(lat, lng) {
+        var googleUrl = `https://www.google.com/maps?q=${lat},${lng}&z=17`;
+        window.open(googleUrl, '_blank');
+    }
+    
     function contactForm() {
         return {
             form: {
@@ -540,6 +1030,25 @@
                 };
             }
         }
+    }
+
+    function formatPhone(input) {
+        let value = input.value.replace(/\D/g, '');
+        if (value.length > 0) {
+            if (value[0] === '8') value = '7' + value.slice(1);
+            if (value[0] !== '7') value = '7' + value;
+        }
+        
+        let formatted = '';
+        if (value.length > 0) {
+            formatted = '+7';
+            if (value.length > 1) formatted += ' (' + value.slice(1, 4);
+            if (value.length > 4) formatted += ') ' + value.slice(4, 7);
+            if (value.length > 7) formatted += '-' + value.slice(7, 9);
+            if (value.length > 9) formatted += '-' + value.slice(9, 11);
+        }
+        
+        input.value = formatted;
     }
 </script>
 {% endblock %}

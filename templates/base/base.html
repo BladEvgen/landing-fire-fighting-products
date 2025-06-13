@@ -14,13 +14,9 @@
     
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="manifest" href="{% static 'site.webmanifest' %}">
     <meta name="theme-color" content="#d51b1b">
     <meta name="msapplication-TileColor" content="#d51b1b">
-    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -164,6 +160,10 @@
     
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/swiper-bundle.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fontawesome/css/all.min.css' %}">
+
     
     <!-- Additional CSS -->
     {% block extra_css %}{% endblock %}
@@ -196,8 +196,8 @@
     
     <!-- External Scripts -->
     <script src="{% static 'js/alpine.min.js' %}" defer></script>
-    <script src="{% static 'js/swiper-bundle.min.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/swiper-bundle.min.js'%}"defer></script>
+    <script src="{% static 'js/main.js' %}" defer></script>
     
     <!-- Page specific JavaScript -->
     {% block extra_js %}{% endblock %}
