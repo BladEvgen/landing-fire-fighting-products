@@ -254,8 +254,9 @@ class Product(models.Model):
     specifications = models.TextField(
         "Технические характеристики",
         blank=True,
-        help_text="Используйте формат: Характеристика: Значение (каждая с новой строки)",
+        help_text="Каждую характеристику указывайте с новой строки в формате: <b>Название характеристики: Значение.</b> <br>Например:<br>Предел огнестойкости: не менее 60 мин.<br>Масса двери в сборе: не более 120 кг"
     )
+
 
     categories = models.ManyToManyField(Category, verbose_name="Категории", blank=True)
     tags = models.ManyToManyField(Tag, verbose_name="Теги", blank=True)
