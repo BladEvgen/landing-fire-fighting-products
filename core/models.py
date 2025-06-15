@@ -1,53 +1,23 @@
 from django.db import models
 from django.urls import reverse
 from django.dispatch import receiver
-from django.utils.text import slugify
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db.models.signals import post_delete, pre_save
+from django.db.models.signals import post_delete, pre_save, post_save
 from django.core.validators import FileExtensionValidator, RegexValidator
+from core.utils import (
+    product_upload_path,
+    katalog_upload_path,
+    category_upload_path,
+    product_image_upload_path,
+    certificate_file_upload_path,
+    certificate_image_upload_path,
+)
+from django.utils.text import slugify
+from django.core.files.storage import default_storage
+
 
 ALLOWED_IMAGE_EXTENSIONS = ["png", "jpeg", "webp", "jpg"]
-
-
-def upload_to_slugified(
-    instance,
-    filename,
-    prefix=None,
-    name_field="name",
-    related_object=None,
-    numbered=False,
-):
-    ext = filename.split(".")[-1]
-    if related_object:
-        name = getattr(getattr(instance, related_object), name_field, None)
-    else:
-        name = getattr(instance, name_field, None)
-    base = slugify(name) if name else "file"
-
-    if numbered:
-        number = getattr(instance, "sort_order", None) or getattr(instance, "pk", None)
-        filename = f"{base}_{number}.{ext}" if number else f"{base}.{ext}"
-    else:
-        filename = f"{base}.{ext}"
-
-    return f"{prefix}/{filename}"
-
-
-def certificate_upload_path(instance, filename):
-    return upload_to_slugified(instance, filename, prefix="certificates", numbered=True)
-
-
-def category_upload_path(instance, filename):
-    return upload_to_slugified(instance, filename, prefix="categories")
-
-
-def product_upload_path(instance, filename):
-    return upload_to_slugified(instance, filename, prefix="products")
-
-
-def product_image_upload_path(instance, filename):
-    return upload_to_slugified(instance, filename, prefix="products")
 
 
 class CompanyInfo(models.Model):
@@ -92,18 +62,18 @@ class CompanyInfo(models.Model):
     ogrn = models.CharField("ОГРН", max_length=15, blank=True)
     bank_details = models.TextField("Банковские реквизиты", blank=True)
 
-    meta_description = models.TextField("Мета-описание", max_length=160, blank=True)
+    meta_description = models.TextField(
+        "Описание для поисковиков", max_length=160, blank=True
+    )
     meta_keywords = models.TextField("Ключевые слова", blank=True)
 
     hero_title = models.TextField(
         "Заголовок Hero-секции",
         blank=True,
-        help_text="HTML разрешен. Если пусто, используется стандартный заголовок",
+        help_text="Большой заголовок на главной странице<br>HTML разрешен. Если пусто, используется стандартный заголовок",
     )
-    hero_description = models.TextField("Описание Hero-секции", blank=True)
-    hero_image = models.ImageField(
-        "Изображение Hero-секции", upload_to="hero/", blank=True
-    )
+    hero_description = models.TextField("Описание под заголовком", blank=True)
+    hero_image = models.ImageField("Фоновое изображение", upload_to="hero/", blank=True)
 
     cta_title = models.CharField(
         "Заголовок призыва к действию", max_length=200, blank=True
@@ -125,6 +95,39 @@ class CompanyInfo(models.Model):
     created_at = models.DateTimeField("Создано", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлено", auto_now=True)
 
+    statistics_html = models.TextField(
+        "Код статистики",
+        blank=True,
+        help_text="""
+        Здесь можно разместить HTML код для блока статистики на главной странице.
+        Пример:
+        <div class="stat-item">
+            <span class="number">25+</span>
+            <span class="text">лет опыта</span>
+        </div>
+        """,
+    )
+
+    requisites_file = models.FileField(
+        "Файл реквизитов",
+        upload_to="documents/",
+        blank=True,
+        help_text="PDF файл с реквизитами компании",
+    )
+    price_list = models.FileField(
+        "Прайс-лист",
+        upload_to="documents/",
+        blank=True,
+        help_text="Актуальный прайс-лист",
+    )
+
+    katalog = models.FileField(
+        "Каталог продукции (PDF)",
+        upload_to=katalog_upload_path,
+        blank=True,
+        help_text="Загрузите PDF каталог. Файл автоматически сохранится как katalog-vympel.pdf",
+    )
+
     class Meta:
         verbose_name = "Информация о компании"
         verbose_name_plural = "Информация о компании"
@@ -132,21 +135,34 @@ class CompanyInfo(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.katalog and self.pk:
+            try:
+                old_instance = CompanyInfo.objects.get(pk=self.pk)
+                if old_instance.katalog and old_instance.katalog != self.katalog:
+                    if default_storage.exists("static/katalog-vympel.pdf"):
+                        default_storage.delete("static/katalog-vympel.pdf")
+            except CompanyInfo.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
 
 class Certificate(models.Model):
-    name = models.CharField("Название", max_length=200)
-    description = models.TextField("Описание", blank=True)
+    name = models.CharField("Название", max_length=200, help_text="Полное название сертификата или документа, лимит в 200 символов")
+    description = models.TextField("Описание", blank=True, help_text="Дополнительная информация о сертификате")
     image = models.ImageField(
         "Изображение сертификата",
-        upload_to=certificate_upload_path,
+        upload_to=certificate_image_upload_path,
         validators=[
             FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS)
         ],
+        help_text="Скан или фото сертификата для показа на сайте"
     )
-    file = models.FileField("Файл сертификата", upload_to="certificates/", blank=True)
+    file = models.FileField("Файл сертификата",  upload_to=certificate_file_upload_path, blank=True)
 
     issued_date = models.DateField("Дата выдачи", null=True, blank=True)
-    expiry_date = models.DateField("Дата окончания", null=True, blank=True)
+    expiry_date = models.DateField("Дата окончания", null=True, blank=True, help_text="Оставьте пустым если сертификат бессрочный")
 
     is_active = models.BooleanField("Активен", default=True)
     sort_order = models.PositiveIntegerField("Порядок сортировки", default=0)
@@ -170,6 +186,14 @@ class Certificate(models.Model):
             return timezone.now().date() > self.expiry_date
         return False
 
+    @property
+    def status_display(self):
+        if self.is_expired:
+            return "Истёк"
+        elif self.expiry_date:
+            return "Действителен"
+        else:
+            return "Бессрочный"
 
 class Category(models.Model):
     name = models.CharField("Название", max_length=100)
@@ -183,8 +207,8 @@ class Category(models.Model):
             FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS)
         ],
     )
-    icon = models.CharField("Иконка (CSS класс)", max_length=50, blank=True)
-
+    icon = models.CharField("CSS класс иконки", max_length=50, blank=True,
+                          help_text="Например: fa-fire для иконки огня, используйте Font Awesome FREE v.6 классы")
     meta_title = models.CharField("Meta Title", max_length=60, blank=True)
     meta_description = models.CharField("Meta Description", max_length=160, blank=True)
 
@@ -210,9 +234,13 @@ class Category(models.Model):
     def get_absolute_url(self):
         return reverse("core:category_detail", args=[self.slug])
 
+    @property
+    def product_count(self):
+        return self.product_set.filter(is_active=True).count()
 
 class Tag(models.Model):
-    name = models.CharField("Название", max_length=50)
+    name = models.CharField("Название тега", max_length=50,
+                          help_text="Короткое название тега (например: Новинка)")
     slug = models.SlugField("URL", unique=True, blank=True)
     color = models.CharField(
         "Цвет",
@@ -238,10 +266,13 @@ class Tag(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField("Название", max_length=200)
-    slug = models.SlugField("URL", max_length=200, unique=True, blank=True)
-    short_description = models.TextField("Краткое описание", max_length=500, blank=True)
-    description = models.TextField("Описание", blank=True)
+    name = models.CharField("Название товара", max_length=200,
+                          help_text="Полное название товара")
+    slug = models.SlugField("URL адрес", unique=True, blank=True)
+    short_description = models.CharField("Краткое описание", max_length=300, blank=True,
+                                       help_text="Краткое описание для карточки товара")
+    description = models.TextField("Полное описание", blank=True,
+                                 help_text="Подробное описание товара")
     image = models.ImageField(
         "Основное изображение",
         upload_to=product_upload_path,
@@ -254,12 +285,13 @@ class Product(models.Model):
     specifications = models.TextField(
         "Технические характеристики",
         blank=True,
-        help_text="Каждую характеристику указывайте с новой строки в формате: <b>Название характеристики: Значение.</b> <br>Например:<br>Предел огнестойкости: не менее 60 мин.<br>Масса двери в сборе: не более 120 кг"
+        help_text="Каждую характеристику указывайте с новой строки в формате: <b>Название характеристики: Значение.</b> <br>Например:<br>Предел огнестойкости: не менее 60 мин.<br>Масса двери в сборе: не более 120 кг",
     )
 
-
-    categories = models.ManyToManyField(Category, verbose_name="Категории", blank=True)
-    tags = models.ManyToManyField(Tag, verbose_name="Теги", blank=True)
+    categories = models.ManyToManyField(Category, verbose_name="Категории", blank=True,
+                                      help_text="Выберите одну или несколько категорий")
+    tags = models.ManyToManyField(Tag, verbose_name="Теги", blank=True,
+                                help_text="Теги для дополнительной фильтрации")
 
     is_active = models.BooleanField("Активен", default=True)
     is_featured = models.BooleanField(
@@ -267,9 +299,8 @@ class Product(models.Model):
         default=False,
         help_text="Отображается в разделе рекомендуемых товаров",
     )
-    is_new = models.BooleanField(
-        "Новинка", default=False, help_text="Отображается значок 'Новинка'"
-    )
+    is_new = models.BooleanField("Новинка", default=False,
+                               help_text="Будет отмечен как новинка")
     in_stock = models.BooleanField(
         "В наличии",
         default=True,
@@ -315,6 +346,13 @@ class Product(models.Model):
                 specs[key.strip()] = value.strip()
         return specs
 
+    @property
+    def display_price(self):
+        if self.price:
+            prefix = "от " if self.price_from else ""
+            return f"{prefix}{self.price:,.0f} ₽"
+        return "Цена по запросу"
+
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
@@ -326,8 +364,9 @@ class ProductImage(models.Model):
         validators=[
             FileExtensionValidator(allowed_extensions=ALLOWED_IMAGE_EXTENSIONS)
         ],
+        help_text="Дополнительные фотографии товара"
     )
-    alt_text = models.CharField("Alt текст", max_length=200, blank=True)
+    alt_text = models.CharField("Описание изображения", max_length=200, blank=True, help_text="Если картинка не загрузится, будет показан этот текст, также для доступности")
     sort_order = models.PositiveIntegerField("Порядок", default=0)
 
     class Meta:
@@ -386,6 +425,10 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         return self.user.username
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(post_delete, sender=Certificate)
