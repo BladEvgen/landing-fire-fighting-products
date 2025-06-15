@@ -210,13 +210,17 @@ def contacts(request):
             phone = request.POST.get("phone", "").strip()
             email = request.POST.get("email", "").strip()
             message = request.POST.get("message", "").strip()
-
-            if name and phone:
+            personal_data_consent = request.POST.get("consent")
+            if personal_data_consent == "true":
+                personal_data_consent = True
+            
+            if name and phone and personal_data_consent:
                 contact_form = ContactForm.objects.create(
                     name=name,
                     phone=phone,
                     email=email,
                     message=message,
+                    personal_data_consent=personal_data_consent,
                     ip_address=get_client_ip(request),
                     user_agent=request.META.get("HTTP_USER_AGENT", ""),
                     referer=request.META.get("HTTP_REFERER", ""),
@@ -326,9 +330,7 @@ def get_client_ip(request):
 
 @staff_member_required
 def statistics_view(request):
-    """Представление статистики для админки"""
     
-    # Основная статистика
     stats = {
         'total_products': Product.objects.count(),
         'active_products': Product.objects.filter(is_active=True).count(),
@@ -352,7 +354,6 @@ def statistics_view(request):
         ).count(),
     }
     
-    # Статистика по дням за последнюю неделю
     week_data = []
     for i in range(7):
         date = datetime.now().date() - timedelta(days=i)
@@ -362,14 +363,12 @@ def statistics_view(request):
             'count': count
         })
     
-    # Статистика по статусам заявок
     status_stats = {}
     for status_code, status_name in ContactForm.STATUS_CHOICES:
         status_stats[status_name] = ContactForm.objects.filter(
             status=status_code
         ).count()
     
-    # Топ категории по количеству товаров
     top_categories = Category.objects.annotate(
         product_count=Count('product')
     ).order_by('-product_count')[:5]
@@ -387,7 +386,6 @@ def statistics_view(request):
 @staff_member_required 
 @require_http_methods(["GET", "POST"])
 def backup_view(request):
-    """Представление для создания резервных копий"""
     
     if request.method == 'POST':
         include_images = request.POST.get('include_images')
@@ -395,8 +393,7 @@ def backup_view(request):
         include_users = request.POST.get('include_users')
         
         try:
-            # Здесь можно добавить логику создания бэкапа
-            # Например, использовать django-dbbackup или создать свой механизм
+
             
             backup_data = {
                 'timestamp': datetime.now().isoformat(),
@@ -408,7 +405,6 @@ def backup_view(request):
                 'contacts_count': ContactForm.objects.count() if include_contacts else 0,
             }
             
-            # Создаем JSON-файл с метаданными бэкапа
             response = HttpResponse(
                 json.dumps(backup_data, indent=2, ensure_ascii=False),
                 content_type='application/json; charset=utf-8'
@@ -428,12 +424,10 @@ def backup_view(request):
 
 @staff_member_required
 def export_products(request):
-    """Экспорт товаров в CSV"""
     
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="products_export_{datetime.now().strftime("%Y%m%d")}.csv"'
     
-    # Добавляем BOM для корректного отображения в Excel
     response.write('\ufeff')
     
     writer = csv.writer(response)
@@ -463,12 +457,10 @@ def export_products(request):
 
 @staff_member_required
 def export_contacts(request):
-    """Экспорт заявок в CSV"""
     
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = f'attachment; filename="contacts_export_{datetime.now().strftime("%Y%m%d")}.csv"'
     
-    # Добавляем BOM для корректного отображения в Excel
     response.write('\ufeff')
     
     writer = csv.writer(response)
